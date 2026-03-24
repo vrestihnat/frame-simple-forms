@@ -41,7 +41,7 @@ $.extend($.euroclip.Frame.prototype, {
 								price = data.match(/\"price\": \"([0-9]+\.*[0-9]*)\",/);
 								if (price != null) {
 									that.priceProductId = 1; // upgates: pid nepotřebujeme, používáme URI
-									$.euroclip.log("priceProductUri " + that.priceProductUri);
+				 					$.euroclip.log("priceProductUri " + that.priceProductUri);
 
 									// nastavím reálnou cenu produktu
 									result = prices[i][that.getProductTypeCodeWithoutAtyp()] = parseFloat(price[1]);
