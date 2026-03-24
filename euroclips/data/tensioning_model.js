@@ -1,11 +1,12 @@
 
 $.euroclip.BlindFrame = function () {
 	this.sizeA = 0;
-	this.sizeB = 0;	
+	this.sizeB = 0;
 	this.format = "";
 	this.side = "";
 	this.price = 0;
 	this.priceProductId = 0;
+	this.priceProductUri = "";
 	this.bar = 2000;
 	this.xhr = null;
 	this.xhr2 = null;
@@ -20,22 +21,22 @@ $.euroclip.BlindFrame.prototype = {
 	refreshPrice: function () {
 		$("#buy_btn").attr("disabled", true); //aby nešlo koupit vždy během výpočtu
 		this.refreshProductCode();
-		
+
 		if (this.getSizeA() === 0 || this.getSizeB() === 0 || this.format =="" || (this.format == "dleobr" && this.side == "")) {
-			this.price = 0;			
+			this.price = 0;
 			this.redrawPrice();
 		} else {
 			var that = this;
-			
+
 			if (this.xhr != null)
 				this.xhr.abort();
-			
+
 			this.xhr = $.ajax({
 				crossDomain: true,
 				type: 'GET',
 				async : false,
 				url: "https://api.ramari.cz/api/enum_blindframe_plate_price/649/" + this.getSizeA() + "/" + this.getSizeB() + "/" + $.euroclip.LANG,
-				headers: {          
+				headers: {
 					Accept: "application/json"
 				},
 				success: function (res) {
@@ -44,15 +45,15 @@ $.euroclip.BlindFrame.prototype = {
 					price *= $.euroclip.getVAT();
 
 					if (price > 0) {
-						
+
 						that.priceProductId = 0;
-						
+
 						$.ajax({
 							crossDomain: true,
 							async : false,
 							type: 'GET',
 							url: "https://api.ramari.cz/api/rounded_bohemian_product/" + Math.round(price) + "/" + $.euroclip.LANG,
-							headers: {          
+							headers: {
 								Accept: "application/json"
 							},
 							success: function (data) {
@@ -62,20 +63,11 @@ $.euroclip.BlindFrame.prototype = {
 									that.price = data["eur"];
 								}
 
-								$.ajax({
-									type: "GET",
-									url: data["uri"],
-									async : false,
-									dataType: "html",
-									success: function (data) {
-										data = data.match(/name=\"pid\" value=\"([0-9]+)/);
-										if (data != null) {
-											that.priceProductId = data[1];
-											$.euroclip.log("priceProductId " + that.priceProductId);
-											$("#buy_btn").attr("disabled", false);
-										}
-									}
-								});
+								// upgates: uložíme URI produktu, nepotřebujeme pid
+								that.priceProductUri = data["uri"].replace(/^\//, "/p/");
+								that.priceProductId = 1; // pro zpětnou kompatibilitu (> 0 check)
+								$.euroclip.log("priceProductUri " + that.priceProductUri);
+								$("#buy_btn").attr("disabled", false);
 
 								that.redrawPrice();
 							}
@@ -92,6 +84,9 @@ $.euroclip.BlindFrame.prototype = {
 	},
 	getPriceProductId: function () {
 		return this.priceProductId;
+	},
+	getPriceProductUri: function () {
+		return this.priceProductUri;
 	},
 	setSizeA: function (size) {
 		this.sizeA = this.validateSize(size);
@@ -152,12 +147,12 @@ $.euroclip.BlindFrame.prototype = {
 
 
 $.euroclip.loadTensioning = function() {
-	
+
 	$.euroclip.log("tensioning model loaded");
-	
-	
+
+
 	var blindFrame = new $.euroclip.BlindFrame();
-	
+
 	$("#tg-size-a, #tg-size-b").keydown(function (e) {
 		// omezení všeho kromě číslic, ,. , šipek, backspace, del, tab
 		var keyCode = (e.keyCode ? e.keyCode : e.which);
@@ -182,16 +177,16 @@ $.euroclip.loadTensioning = function() {
 			$.euroclip.showDialog("Omlouváme se, minimální výška obrázku je 9 cm.");
 		}
 	});
-	
+
 	$(".tg .btn").click(function(e) {
 		e.preventDefault();
 		$(this).closest(".tg-block").find(".btn").removeClass("active");
 		$(this).addClass("active");
-	});	
+	});
 	$("#tg-presne").click(function(e) {
 		$(".step--3 .step__count").text("2");
 		$(".step--3").slideDown();
-		$(".step--2").slideUp();		
+		$(".step--2").slideUp();
 		blindFrame.setFormat("presne");
 		//blindFrame.setSide("");
 	});
@@ -211,20 +206,14 @@ $.euroclip.loadTensioning = function() {
 		$(".step--3").slideDown();
 		blindFrame.setSide("bily");
 	});
-	
-	
-	
+
+
+
 	$('#buy_btn').on('click', function (e) {
 		e.stopPropagation();
-		if (blindFrame.getPrice() > 0 && blindFrame.getPriceProductId() > 0) {
+		if (blindFrame.getPrice() > 0 && blindFrame.getPriceProductId() > 0 && blindFrame.getPriceProductUri()) {
 
 			var note = blindFrame.getSizeA() + "x" + blindFrame.getSizeB() + " | " + blindFrame.getLabel() + " (" + blindFrame.getProductCode() + ")";
-
-			/* pokud nastala chyba a objednává se prázdný konfugurátor */
-			/* TODO: zde by měly být asi ID všech konfigurátorů...?? */
-			if (blindFrame.getPriceProductId() == 5 || blindFrame.getPriceProductId() == 10 || blindFrame.getPriceProductId() == 15 || blindFrame.getPriceProductId() == 20) {
-				return false;
-			}
 
 			/* přidání poznámky do cookie */
 			var notes = $.euroclip.getCookie("notes");
@@ -238,49 +227,16 @@ $.euroclip.loadTensioning = function() {
 			date.setDate(date.getDate()+1);
 			document.cookie = 'notes=' + JSON.stringify(notes) + '; path=/; expires=' + date.toGMTString();
 
-			$.ajax({
-				type: "POST",
-				url: "/wa_script/basket_ajax.php",
-				async: false,
-				data: {
-					get_aditional_info: 0,
-					id: $.euroclip.ID_SITE,
-					item: blindFrame.getPriceProductId(),
-					item_variant: 0,
-					kusy: 1,
-					poznamka: note,
-					method: 'add'
-				},
-				dataType: "text",
-				success: function (data) {
-					if (data == 1) {
-
-						$.ajax({
-							type: "GET",
-							url: "/" + $.euroclip.ADDR_BASKET + "?is_ajax=1",
-							dataType: "html",
-							success: function (data) {
-								if (data != null) {
-									var $data = $(data);
-									$("#header-basket").html($data.find("#header-basket").html());
-								}
-							}
-						});
-
-						$.euroclip.showDialog("Zboží bylo přidáno do košíku.");
-						$.euroclip.log(data);
-						//todo chcete objednat další?
-						//window.location.href = "/" + $.euroclip.ADDR_BASKET;
-					} else {
-						$.euroclip.log("Chyba!");
-						$.euroclip.log(data);
-					}
-				}
-			});
+			// upgates: vložení do košíku přes URL
+			var cartUrl = blindFrame.getPriceProductUri()
+				+ "?addtocart=1"
+				+ "&quantity=1"
+				+ "&productnote=" + encodeURIComponent(note)
+				+ "&return=cart";
+			window.location.href = cartUrl;
 		}
 
 		return false;
 	});
-	
-};
 
+};

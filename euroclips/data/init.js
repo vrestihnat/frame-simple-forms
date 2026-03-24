@@ -48,12 +48,15 @@ function fn() {
 
 
   $.euroclip.DEBUG = true;
-  $.euroclip.HOLDER = $('#detail .c1303').first();
+  $.euroclip.HOLDER = $('[data-designer-module="product-detail-top-2"]').first();
+  if ($.euroclip.HOLDER.length === 0) {
+    $.euroclip.HOLDER = $('#detail .c1303').first(); // fallback pro starý eshop
+  }
   $.euroclip.WEB_PREFIX = "";
 
   if (window.location.hostname.indexOf(".sk") > 0) {
     $.euroclip.LANG = "sk";
-    $.euroclip.SCRIPT_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/data/data/';
+    $.euroclip.SCRIPT_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/data/';
     $.euroclip.SHOP_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/';
     $.euroclip.ADDR_BASKET = $.euroclip.WEB_PREFIX + "dantik-sk/e-basket";
     $.euroclip.ADDR_BASKET_2 = $.euroclip.WEB_PREFIX + "dantik-sk/e-shipping";
@@ -61,7 +64,7 @@ function fn() {
     $.euroclip.ID_SITE = 9862; //ID uživatele eshop-rychle
   } else {
     $.euroclip.LANG = "cz";
-    $.euroclip.SCRIPT_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/data/data/';
+    $.euroclip.SCRIPT_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/data/';
     $.euroclip.SHOP_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/';
     $.euroclip.ADDR_BASKET = $.euroclip.WEB_PREFIX + "dantik-cz/e-basket";
     $.euroclip.ADDR_BASKET_2 = $.euroclip.WEB_PREFIX + "dantik-cz/e-shipping";
@@ -161,6 +164,7 @@ function fn() {
       $.euroclip.log(ks);
       $.euroclip.log(note);
 
+      // upgates: vložení do košíku přes URL
       $.ajax({
         type: "GET",
         url: url,
@@ -169,65 +173,18 @@ function fn() {
           Accept: "application/json"
         },
         success: function (data) {
-          $.ajax({
-            type: "GET",
-            url: data.uri,
-            dataType: "html",
-            success: function (data) {
-              data = data.match(/name=\"pid\" value=\"([0-9]+)/);
-              if (data != null) {
-                var priceProductId = data[1];
-                $.euroclip.log("priceProductId " + priceProductId);
-
-                $.ajax({
-                  type: "POST",
-                  url: "/wa_script/basket_ajax.php",
-                  async: false,
-                  data: {
-                    get_aditional_info: 0,
-                    id: $.euroclip.ID_SITE,
-                    item: priceProductId,
-                    item_variant: 0,
-                    kusy: ks,
-                    poznamka: note,
-                    method: 'add'
-                  },
-                  dataType: "text",
-                  success: function (data) {
-                    if (data == 1) {
-                      $.euroclip.log("success");
-                      if ($.euroclip.LANG === "cz") {
-                        window.location = "https://www.dantik.cz/" + $.euroclip.ADDR_BASKET;
-                      } else {
-                        window.location = "https://www.dantik.sk/" + $.euroclip.ADDR_BASKET;
-                        /*
-                         $.ajax({
-                         type: "GET",
-                         url: "/" + $.euroclip.ADDR_BASKET + "?is_ajax=1",
-                         dataType: "html",
-                         success: function (data) {
-                         if (data != null) {
-                         var $data = $(data);
-                         $("#header-basket").html($data.find("#header-basket").html());
-                         }
-                         }
-                         });
-                         $.euroclip.showDialog("Tovar bol pridaný do košíka.");*/
-                      }
-                    }
-                  }
-                });
-              }
-            }
-          });
+          var productUri = data.uri.replace(/^\//, "/p/");
+          var cartUrl = productUri
+            + "?addtocart=1"
+            + "&quantity=" + ks
+            + "&productnote=" + encodeURIComponent(note)
+            + "&return=cart";
+          $.euroclip.log("upgates cart redirect: " + cartUrl);
+          window.location.href = cartUrl;
         },
         error: function () {
           $.euroclip.log("error");
-          if ($.euroclip.LANG === "cz") {
-            window.location = "https://www.dantik.cz/" + $.euroclip.ADDR_BASKET;
-          } else {
-            window.location = "https://www.dantik.sk/" + $.euroclip.ADDR_BASKET;
-          }
+          window.location.href = "/cart";
         }
       });
     }
@@ -749,6 +706,9 @@ function fn() {
       dataType: "html",
       success: function (data) {
         $.euroclip.HOLDER.html(data);
+        if ($.euroclip.currentGroup == "euroklip") {
+          $("#colors").hide();
+        }
       }
     });
     var specific_model = $.ajax({
@@ -781,16 +741,20 @@ function fn() {
       /*
        * PRODUKT Z KONFIGU
        */
+      $.euroclip.log("HOLDER: " + $.euroclip.HOLDER.length + " elements, href: " + href);
+      $.euroclip.log("products count: " + ($.euroclip.products ? $.euroclip.products.length : "UNDEFINED"));
       for (var i = 0; i < $.euroclip.products.length; i++) {
         if (href.endsWith($.euroclip.products[i].url)) {
           $.euroclip.currentProduct = $.euroclip.products[i];
           $.euroclip.currentGroup = $.euroclip.products[i].group; // group je frame, nebo euroklip, nebo glass, nebo base
+          $.euroclip.log("MATCH: " + $.euroclip.products[i].code + " | " + $.euroclip.products[i].url);
           break;
         }
       }
 
       // zkusím parsovat adresu, pokud jsem nenašel v config
       if ($.euroclip.currentProduct === null) {
+        $.euroclip.log("NO MATCH for href: " + href);
         //EKP-A-9X13
         var result = href.match(/\/(EKP|EKS)-(A|K)-atyp-([\d]{1,3})x([\d]{1,3})/i);
         if (result) {
@@ -814,7 +778,12 @@ function fn() {
           clearTimeout(window.euroclipConfiguratorTimeout);
         }
 
-        $("h1.c716.c1335").text("Konfigurátor");
+        var $h1 = $("h1.c716.c1335");
+        if ($h1.length === 0) $h1 = $.euroclip.HOLDER.closest('[data-designer-module]').parent().find('h1').first(); // UpGates
+        if ($h1.length === 0) $h1 = $.euroclip.HOLDER.prevAll('h1').first(); // další fallback
+        if ($h1.length === 0) $h1 = $("h1").first();
+        $.euroclip.log("H1 found: " + $h1.length + " | text: " + $h1.text());
+        $h1.text("Konfigurátor");
         $.euroclip.HOLDER.html('<img src="' + $.euroclip.SCRIPT_SOURCE + 'loading.svg" style="width:64px;height:64px;margin:100px auto">').addClass("euroclipconfig").attr('id', 'euroclipconfig');
 
         // Odebrat předběžnou třídu z head scriptu, konfigurátor se nyní opravdu spouští
@@ -827,6 +796,7 @@ function fn() {
           this.price = 0;
           this.purePrice = 0;
           this.priceProductId = 0;
+          this.priceProductUri = "";
           this.standard = false;
           this.xhr = null;
           this.complete = true;
@@ -885,6 +855,9 @@ function fn() {
           },
           getPriceProductId: function () {
             return this.priceProductId;
+          },
+          getPriceProductUri: function () {
+            return this.priceProductUri;
           },
           getProductCode: function () {
             if (this.getSizeA() > 0 && this.getSizeB() > 0) {
@@ -993,7 +966,7 @@ function fn() {
           var template = $.ajax({
             crossDomain: true,
             type: 'GET',
-            url: $.euroclip.SCRIPT_SOURCE + 'euroclip_template.csv', /* TODO: template možná stejný??? */
+            url: $.euroclip.SCRIPT_SOURCE + 'euroclip_template.html?v='+ new Date().getTime(), /* TODO: template možná stejný??? */
             dataType: "html",
             success: function (data) {
               $.euroclip.HOLDER.html(data);
@@ -1002,7 +975,7 @@ function fn() {
           var specific_model = $.ajax({
             crossDomain: true,
             type: 'GET',
-            url: $.euroclip.SCRIPT_SOURCE + 'euroclip_model.csv',
+            url: $.euroclip.SCRIPT_SOURCE + 'euroclip_model.js',
             dataType: "script"
           });
           var a1 = ajaxCsvConfig('prices_euroklip', 'prices', true);
@@ -1016,7 +989,7 @@ function fn() {
           var template = $.ajax({
             crossDomain: true,
             type: 'GET',
-            url: $.euroclip.SCRIPT_SOURCE + 'frame_template.csv',
+            url: $.euroclip.SCRIPT_SOURCE + 'frame_template.html',
             dataType: "html",
             success: function (data) {
               $.euroclip.HOLDER.html(data);
@@ -1025,7 +998,7 @@ function fn() {
           var specific_model = $.ajax({
             crossDomain: true,
             type: 'GET',
-            url: $.euroclip.SCRIPT_SOURCE + 'frame_model.csv',
+            url: $.euroclip.SCRIPT_SOURCE + 'frame_model.html',
             dataType: "script"
           });
 
@@ -1125,6 +1098,7 @@ function fn() {
                 $("#color").change();
                 $("#colors").show();
               } else {
+                $("#colors").hide();
                 clip.refreshPrice();
               }
             } else {
@@ -1190,6 +1164,8 @@ function fn() {
               clip.setHasHooks($(this).val());
               clip.refreshPrice();
             });
+          } else {
+            $("#colors").hide();
           }
 
           $("#size-a, #size-b").keydown(function (e) {
@@ -1320,45 +1296,15 @@ function fn() {
                 //nemelo by nastat
                 return false;
               }
-              $.ajax({
-                type: "POST",
-                url: "/wa_script/basket_ajax.php",
-                async: false,
-                data: {
-                  get_aditional_info: 0,
-                  id: $.euroclip.ID_SITE,
-                  item: clip.getPriceProductId(),
-                  item_variant: 0,
-                  kusy: parseFloat($("#kusy").val()).toFixed(0),
-                  poznamka: note,
-                  method: 'add'
-                },
-                dataType: "text",
-                success: function (data) {
-                  if (data == 1) {
-
-                    $.ajax({
-                      type: "GET",
-                      url: "/" + $.euroclip.ADDR_BASKET + "?is_ajax=1",
-                      dataType: "html",
-                      success: function (data) {
-                        if (data != null) {
-                          var $data = $(data);
-                          $("#header-basket").html($data.find("#header-basket").html());
-                        }
-                      }
-                    });
-
-                    $.euroclip.showDialog("Zboží bylo přidáno do košíku.");
-                    $.euroclip.log(data);
-                    //todo chcete objednat další?
-                    //window.location.href = "/" + $.euroclip.ADDR_BASKET;
-                  } else {
-                    $.euroclip.log("Chyba!");
-                    $.euroclip.log(data);
-                  }
-                }
-              });
+              // upgates: vložení do košíku přes URL
+              var ks = parseFloat($("#kusy").val()).toFixed(0);
+              var cartUrl = clip.getPriceProductUri()
+                + "?addtocart=1"
+                + "&quantity=" + ks
+                + "&productnote=" + encodeURIComponent(note)
+                + "&return=cart";
+              $.euroclip.log("upgates cart redirect: " + cartUrl);
+              window.location.href = cartUrl;
             }
 
             return false;
@@ -1369,8 +1315,12 @@ function fn() {
         };
       } else {
         // něco jiného - běžný produkt?
-        if ($("h1.c716.c1335").text().indexOf("Zboží na míru") != -1) {
-          $("form.c751").remove();
+        var $h1check = $("h1.c716.c1335");
+        if ($h1check.length === 0) $h1check = $("h1").first();
+        if ($h1check.text().indexOf("Zboží na míru") != -1) {
+          var $formRemove = $("form.c751");
+          if ($formRemove.length === 0) $formRemove = $.euroclip.HOLDER.find("form").first();
+          $formRemove.remove();
         }
       }
     }
@@ -1454,34 +1404,18 @@ function fn() {
           console.log(notes2add);
           event.preventDefault();
           event.stopPropagation();
-          var priceProductId = $(f).find('input[name=pid]').val();
-          var ks = $(f).find('input[name=kusy]').val();
-          //console.log(priceProductId);
-          $.ajax({
-            type: "POST",
-            url: "/wa_script/basket_ajax.php",
-            async: false,
-            data: {
-              get_aditional_info: 0,
-              id: $.euroclip.ID_SITE,
-              item: priceProductId,
-              item_variant: 0,
-              kusy: ks,
-              poznamka: notes2add,
-              method: 'add'
-            },
-            dataType: "text",
-            success: function (data) {
-              if (data == 1) {
-                $.euroclip.log("success");
-                if ($.euroclip.LANG === "cz") {
-                  window.location = "https://www.dantik.cz/" + $.euroclip.ADDR_BASKET;
-                } else {
-                  window.location = "https://www.dantik.sk/" + $.euroclip.ADDR_BASKET;
-                }
-              }
-            }
-          });
+          var ks = $(f).find('input[name=kusy]').val() || 1;
+
+          // upgates: vložení do košíku přes URL produktu
+          // získáme URL produktu z action formuláře nebo z aktuální stránky
+          var productUrl = window.location.pathname;
+          var cartUrl = productUrl
+            + "?addtocart=1"
+            + "&quantity=" + ks
+            + "&productnote=" + encodeURIComponent(notes2add)
+            + "&return=cart";
+          $.euroclip.log("upgates cart redirect: " + cartUrl);
+          window.location.href = cartUrl;
           return false;
 
         });

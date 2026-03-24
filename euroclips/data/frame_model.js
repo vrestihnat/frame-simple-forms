@@ -4,11 +4,11 @@ $.extend($.euroclip.Frame.prototype, {
 		this.updateLabelClip();
 		this.updateImage();
 
-		
+
 		if (this.getSizeA() === 0 || this.getSizeB() === 0) {
 			this.price = 0;
 			$(".label-sizes").hide();
-			
+
 			$(".euroclipconfig .price-value").html($.euroclip.formatPrice(this.price) + "&nbsp;" + $.euroclip.getCurrancy());
 			$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(this.price / $.euroclip.getVAT()) + "&nbsp;" + $.euroclip.getCurrancy());
       $("#buy_btn").attr("disabled", true);
@@ -93,7 +93,7 @@ $.extend($.euroclip.Frame.prototype, {
 						async : false,
 						type: 'GET',
 						url: "https://api.ramari.cz/api/rounded_bohemian_product/" + Math.round(result) + "/" + $.euroclip.LANG,
-						headers: {          
+						headers: {
 							Accept: "application/json"
 						},
 						success: function (data) {
@@ -103,20 +103,11 @@ $.extend($.euroclip.Frame.prototype, {
 								that.price = data["eur"];
 							}
 
-							$.ajax({
-								type: "GET",
-								url: data["uri"],
-								dataType: "html",
-								async : false,
-								success: function (data) {
-									data = data.match(/name=\"pid\" value=\"([0-9]+)/);
-									if (data != null) {
-										that.priceProductId = data[1];							
-										$.euroclip.log("priceProductId " + that.priceProductId);
-										$("#buy_btn").attr("disabled", false);
-									}
-								}
-							});
+							// upgates: uložíme URI produktu, nepotřebujeme pid
+							that.priceProductUri = data["uri"].replace(/^\//, "/p/");
+							that.priceProductId = 1; // pro zpětnou kompatibilitu (> 0 check)
+							$.euroclip.log("priceProductUri " + that.priceProductUri);
+							$("#buy_btn").attr("disabled", false);
 
 							$(".euroclipconfig .price-value").html($.euroclip.formatPrice(that.price) + "&nbsp;" + $.euroclip.getCurrancy());
 							$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(that.price / $.euroclip.getVAT()) + "&nbsp;" + $.euroclip.getCurrancy());
@@ -129,7 +120,7 @@ $.extend($.euroclip.Frame.prototype, {
 				this.price = 0;
 				$.euroclip.showDialog("Omlouváme se, na základě zadaných parametrů nelze rám vyrobit.");
 				$(".label-sizes").hide();
-				
+
 				$(".euroclipconfig .price-value").html($.euroclip.formatPrice(this.price) + "&nbsp;" + $.euroclip.getCurrancy());
 				$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(this.price / $.euroclip.getVAT()) + "&nbsp;" + $.euroclip.getCurrancy());
 			}
@@ -140,8 +131,8 @@ $.extend($.euroclip.Frame.prototype, {
 
 		return this;
 	},
-	
-	
+
+
 	updateLabelClip: function () {
 		var label = "";
 		if (this.getHasFrame()) {
@@ -170,8 +161,11 @@ $.extend($.euroclip.Frame.prototype, {
 			$("#img-clip-type2").hide();
 		}
 	},
-	
-	
+
+	getPriceProductUri: function () {
+		return this.priceProductUri;
+	},
+
 	getProductTypeCode: function () {
 		var complete = "";
 		if (this.isComplete()) {
@@ -179,8 +173,8 @@ $.extend($.euroclip.Frame.prototype, {
 		}
 		return (complete + this.getColorCode() + "|" + this.getGlassCode() + "|" + this.getBaseCode() + "|" + this.getHooksCode() + "|atyp").replace(/\|{2,}/g, "|").replace(/^\|/g, "");
 	},
-	
-	
+
+
 	getColorCode: function () {
 		if (this.getHasFrame()) {
 			return this.color.code;
@@ -213,8 +207,8 @@ $.extend($.euroclip.Frame.prototype, {
 			}
 		});
 	},
-	
-	
+
+
 	getGlassCode: function () {
 		if (this.getHasGlass() && this.glass) { // TODO: při načítání špatně setlý getHasGlass, glass je chvíli prázdný
 			return this.glass.code;
@@ -238,8 +232,8 @@ $.extend($.euroclip.Frame.prototype, {
 			$glass.append('<option value="' + item.code + '">' + eval("item.name_" + $.euroclip.LANG) + '</option>');
 		});
 	},
-	
-	
+
+
 	getBaseCode: function () {
 		if (this.getHasBase() && this.base) {
 			return this.base.code;
@@ -287,8 +281,8 @@ $.extend($.euroclip.Frame.prototype, {
 			$("#base").change();
 		}
 	},
-	
-	
+
+
 	getHooksCode: function () {
 		if (this.hasHooks) {
 			return "hacek";
@@ -296,7 +290,7 @@ $.extend($.euroclip.Frame.prototype, {
 			return "";
 		}
 	},
-	
+
 
 	setComplete: function (complete) {
 		this.complete = complete;
@@ -321,8 +315,8 @@ $.extend($.euroclip.Frame.prototype, {
 	isComplete: function () {
 		return this.complete;
 	},
-	
-	
+
+
 	setHasFrame: function (frame) {
 		this.hasFrame = frame;
 	},

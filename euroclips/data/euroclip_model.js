@@ -7,11 +7,11 @@ $.extend($.euroclip.Frame.prototype, {
   	$.euroclip.log("refreshPrice");
 		$("#buy_btn").attr("disabled", true); //aby nešlo koupit vždy během výpočtu
 		this.setStandard(false);
-		
+
 		if (this.getSizeA() === 0 || this.getSizeB() === 0) {
 			this.price = 0;
 			$(".label-sizes").hide();
-			
+
 			$(".euroclipconfig .price-value").html($.euroclip.formatPrice(this.price) + "&nbsp;" + $.euroclip.getCurrancy());
 			$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(this.price * 100 / (100 + $.euroclip.getVAT())) + "&nbsp;" + $.euroclip.getCurrancy());
 		} else {
@@ -23,11 +23,12 @@ $.extend($.euroclip.Frame.prototype, {
 				for (var i = 0; i < prices.length; i++) {
 					if (prices[i].RozmerA == this.getSizeA() && prices[i].RozmerB == this.getSizeB()) {
 						$.euroclip.log("get standard price");
-						var url = "/" + $.euroclip.WEB_PREFIX + this.getProductTypeCodeWithoutAtyp() + "-" + this.getSizeA() + "x" + this.getSizeB();
+						var url = "/" + $.euroclip.WEB_PREFIX + "" + this.getProductTypeCodeWithoutAtyp() + "-" + this.getSizeA() + "x" + this.getSizeB();
 						url = url.replace(/(_|\.)/gi, "-");
 
-						// načtení ID daného cenového produktu
+						// uložení URI produktu pro vložení do košíku (upgates)
 						this.priceProductId = 0;
+						this.priceProductUri = url;
 						var that = this;
 						if (this.xhr != null)
 							this.xhr.abort();
@@ -38,10 +39,9 @@ $.extend($.euroclip.Frame.prototype, {
 							dataType: "html",
 							success: function (data) {
 								price = data.match(/\"price\": \"([0-9]+\.*[0-9]*)\",/);
-								dataId = data.match(/name=\"pid\" value=\"([0-9]+)/);
-								if (dataId != null && price != null) {
-									that.priceProductId = dataId[1];	
-									$.euroclip.log("priceProductId " + that.priceProductId);
+								if (price != null) {
+									that.priceProductId = 1; // upgates: pid nepotřebujeme, používáme URI
+									$.euroclip.log("priceProductUri " + that.priceProductUri);
 
 									// nastavím reálnou cenu produktu
 									result = prices[i][that.getProductTypeCodeWithoutAtyp()] = parseFloat(price[1]);
@@ -78,14 +78,14 @@ $.extend($.euroclip.Frame.prototype, {
 			}
 			if (result > 0) {
 				if (result != this.purePrice) {
-					
+
 					this.purePrice = result;
 
 					if (!this.isStandard()) {
-						// načtení ID daného cenového produktu
+						// načtení URI daného cenového produktu z API
 
 						var that = this;
-						
+
 						if (this.xhr != null)
 							this.xhr.abort();
 						this.xhr = $.ajax({
@@ -93,7 +93,7 @@ $.extend($.euroclip.Frame.prototype, {
 							type: 'GET',
 							async: false,
 							url: "https://api.ramari.cz/api/rounded_bohemian_product/" + Math.round(result) + "/" + $.euroclip.LANG,
-							headers: {          
+							headers: {
 								Accept: "application/json"
 							},
 							success: function (data) {
@@ -103,20 +103,11 @@ $.extend($.euroclip.Frame.prototype, {
 									that.price = data["eur"];
 								}
 
-								$.ajax({
-									type: "GET",
-									url: data["uri"],
-									dataType: "html",
-									async: false,
-									success: function (data) {
-										data = data.match(/name=\"pid\" value=\"([0-9]+)/);
-										if (data != null) {
-											that.priceProductId = data[1];							
-											$.euroclip.log("priceProductId " + that.priceProductId);
-											$("#buy_btn").attr("disabled", false);
-										}
-									}
-								});
+								// upgates: uložíme URI produktu, nepotřebujeme pid
+								that.priceProductUri = data["uri"].replace(/^\//, "/p/");
+								that.priceProductId = 1; // pro zpětnou kompatibilitu (> 0 check)
+								$.euroclip.log("priceProductUri " + that.priceProductUri);
+								$("#buy_btn").attr("disabled", false);
 
 								$(".euroclipconfig .price-value").html($.euroclip.formatPrice(that.price) + "&nbsp;" + $.euroclip.getCurrancy());
 								$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(that.price / $.euroclip.getVAT()) + "&nbsp;" + $.euroclip.getCurrancy());
@@ -127,17 +118,17 @@ $.extend($.euroclip.Frame.prototype, {
 						$(".euroclipconfig .price-value").html($.euroclip.formatPrice(that.price) + "&nbsp;" + $.euroclip.getCurrancy());
 						$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(that.price / $.euroclip.getVAT()) + "&nbsp;" + $.euroclip.getCurrancy());
 						$("#buy_btn").attr("disabled", false);
-					}					
+					}
 				} else {
 					$("#buy_btn").attr("disabled", false);
 				}
 				$(".label-sizes").show();
-				
+
 			} else {
 				this.price = 0;
 				$.euroclip.showDialog("Zadaný rozměr je příliš velký!");
 				$(".label-sizes").hide();
-				
+
 				$(".euroclipconfig .price-value").html($.euroclip.formatPrice(this.price) + "&nbsp;" + $.euroclip.getCurrancy());
 				$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(this.price * 100 / (100 + $.euroclip.getVAT())) + "&nbsp;" + $.euroclip.getCurrancy());
 
@@ -145,11 +136,14 @@ $.extend($.euroclip.Frame.prototype, {
 
 			// až nakonec, když víme, zda není standard
 			this.refreshProductCode();
-			
+
 		}
 
-		
+
 		return this;
+	},
+	getPriceProductUri: function () {
+		return this.priceProductUri;
 	},
 	getProductTypeCode: function () {
 		return this.type.code;
