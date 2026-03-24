@@ -1,0 +1,401 @@
+{
+	"settings": {
+		"bars_waste": 1.15,
+		"price_coef": 1.35,
+		"vat_cz": 1.21,
+		"vat_sk": 1.23,
+		"eur_rate": 26,
+		"hooks": [
+			{
+				"name": 1,
+				"price_vat": 8.2,
+				"upTo": 60
+			},
+			{
+				"name": 2,
+				"price_vat": 16.4,
+				"upTo": 999
+			}
+		]
+	},
+  	"products": [
+		{
+			"group": "euroklip",
+			"code": "EKP_K_atyp",
+			"label": "Euroklip PLEXI čiré [BA]",
+			"url": "ekp-k-atyp",
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+		},
+		{
+			"group": "euroklip",
+			"code": "EKP_A_atyp",
+			"label": "Euroklip PLEXI antireflex [BA]",
+			"url": "ekp-a-atyp",
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+		},
+		{
+			"group": "euroklip",
+			"code": "EKS_K_atyp",
+			"label": "Euroklip SKLO čiré [BA]",
+			"url": "eks-k-atyp",
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+		},
+		{
+			"group": "euroklip",
+			"code": "EKS_A_atyp",
+			"label": "Euroklip SKLO antireflex [BA]",
+			"url": "eks-a-atyp",
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+		},
+		{
+			"group": "base",
+			"code": "zada-atyp",
+			"label": "Dantik Záda k rámům nebo podložky pod puzzle",
+			"url": "zada-atyp",
+			"stock": "Tyto záda vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "base",
+			"code": "PL",
+			"label": "Dantik Podkladová lepenka tl. 2 mm",
+			"url": "pl-atyp",
+			"stock": "Tyto záda vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "base",
+			"code": "VL5",
+			"label": "Dantik Vlnitá lepenka tl. 5 mm",
+			"url": "vl5-atyp",
+			"stock": "Tyto záda vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "base",
+			"code": "MDFBH",
+			"label": "Dantik MDF tl. 3 mm",
+			"url": "mdfbh-atyp",
+			"stock": "Tyto záda vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "base",
+			"code": "AB5D",
+			"label": "Dantik ABoard samolepicí 5 mm",
+			"url": "ab5d-atyp",
+			"stock": "Tyto záda vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "glass",
+			"code": "Sklo_2mm",
+			"label": "Dantik Sklo a Plexi",
+			"url": "sklo-atyp",
+			"stock": "Toto sklo řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+		{
+			"group": "glass",
+			"code": "PLEXI",
+			"label": "Dantik Galerijní akrylát čirý | UV 95 % tl. 2 mm",
+			"url": "plexi-cire-atyp",
+			"stock": "Toto plexi řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+        	{
+			"group": "glass",
+			"code": "SATIN",
+			"label": "Dantik Galerijní akrylát antireflex | UV 99 % tl. 2 mm",
+			"url": "plexi-anti-atyp",
+			"stock": "Toto plexi řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "glass",
+			"code": "Sklo_2mm",
+			"label": "Dantik Sklo čiré | tl. 2 mm",
+			"url": "sklo-cire-atyp",
+			"stock": "Toto sklo řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+		{
+			"group": "glass",
+			"code": "Sklo_Antireflex",
+			"label": "Dantik Sklo antireflex | tl. 2 mm",
+			"url": "sklo-anti-atyp",
+			"stock": "Toto sklo řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+		{
+			"group": "glass",
+			"code": "AGWW160",
+			"label": "Dantik Artglass WatherWhite | „neviditelné“",
+			"url": "sklo-agww-atyp",
+			"stock": "Toto sklo řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+		{
+			"group": "glass",
+			"code": "AG99WW",
+			"label": "Dantik Artglass UV 99 % | „neviditelné“ muzeální",
+			"url": "sklo-aguv-atyp",
+			"stock": "Toto sklo řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+        	{
+			"group": "glass",
+			"code": "Zrcadlo-4mm",
+			"label": "Dantik Zrcadlo tl. 4 mm",
+			"url": "zrcadlo-atyp",
+			"stock": "Toto zrcadlo řežeme u nás a obvykle expedujeme do 24 až 48 hodin"
+        	},
+		{
+			"group": "frame",
+			"code": "114",
+			"label": "Rámeček Dantik Kostička",
+			"url": "ram-kosticka-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "27",
+			"label": "Rámeček Dantik Galerka",
+			"url": "ram-galerka-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "140",
+			"label": "Rámeček Dantik Pastelka",
+			"url": "ram-pastelka-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "211",
+			"label": "Rámeček Dantik Andre",
+			"url": "ram-andre-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "209",
+			"label": "Rámeček Dantik Andre střední",
+			"url": "ram-andrestredni-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "210",
+			"label": "Rámeček Dantik Beauty",
+			"url": "ram-beauty-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "199",
+			"label": "Rámeček Dantik Paint malý",
+			"url": "ram-paint-maly-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "207",
+			"label": "Rámeček Dantik Carina Lípa",
+			"url": "ram-carina-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "205",
+			"label": "Rámeček Dantik Npino",
+			"url": "ram-npino-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "24",
+			"label": "Rámeček Dantik Castagno",
+			"url": "ram-castagno-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "177",
+			"label": "Rámeček Dantik Akvarel",
+			"url": "ram-akvarel-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+	        {
+			"group": "frame",
+			"code": "160",
+			"label": "Rámeček Dantik Lyon",
+			"url": "ram-lyon-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "70",
+			"label": "Rámeček Dantik Hokejka",
+			"url": "ram-hokejka-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+        	{
+			"group": "frame",
+			"code": "118",
+			"label": "Rámeček Dantik Kasette",
+			"url": "ram-kasette-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+        	{
+			"group": "frame",
+			"code": "186",
+			"label": "Rámeček Dantik 4020",
+			"url": "ram-4020-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "137",
+			"label": "Rámeček Dantik Retro",
+			"url": "ram-retro-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "160",
+			"label": "Rámeček Dantik Lyon",
+			"url": "ram-lyon-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "133",
+			"label": "Rámeček Dantik Golf",
+			"url": "ram-golf-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "200",
+			"label": "Rámeček Dantik Paint velký",
+			"url": "ram-paint-velky-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "198",
+			"label": "Rámeček Dantik Zvratný",
+			"url": "ram-zvratny-plast-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "15",
+			"label": "Rámeček Dantik Anglie",
+			"url": "ram-anglie-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "164",
+			"label": "Rámeček Dantik Jumbo",
+			"url": "ram-jumbo-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "147",
+			"label": "Rámeček Dantik Rokoko",
+			"url": "ram-rokoko-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "208",
+			"label": "Rámeček Dantik Zvratná zdobená",
+			"url": "ram-zvratna-zdobena-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "128",
+			"label": "Rámeček Dantik Saudek",
+			"url": "2512",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "182",
+			"label": "Rámeček Dantik Praha",
+			"url": "ram-praha-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "155",
+			"label": "Rámeček Dantik LEAF stříbrná",
+			"url": "2651",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "187",
+			"label": "Rámeček Dantik Křídlo velké",
+			"url": "ram-kridlo-velke-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "120",
+			"label": "Rámeček Dantik L - klasické",
+			"url": "ram-l-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "206",
+			"label": "Rámeček Dantik Travertino",
+			"url": "ram-travetino-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},                                
+		{
+			"group": "frame",
+			"code": "7001",
+			"label": "Rámeček Dantik hliník 7001",
+			"url": "ram-7001-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "7002",
+			"label": "Rámeček Dantik hliník 7002",
+			"url": "ram-7002-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "7003",
+			"label": "Rámeček Dantik hliník 7003",
+			"url": "ram-7003-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "7005",
+			"label": "Rámeček Dantik hliník 7005",
+			"url": "ram-7005-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+		{
+			"group": "frame",
+			"code": "7022",
+			"label": "Rámeček Dantik hliník 7022",
+			"url": "ram-7022-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},	
+		{
+			"group": "frame",
+			"code": "7267",
+			"label": "Rámeček Dantik hliník 7269",
+			"url": "ram-7269-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		},
+        {
+			"group": "frame",
+			"code": "7273",
+			"label": "Rámeček Dantik hliník 7273",
+			"url": "ram-7273-atyp",
+			"stock": "Tento rám vyrábíme u nás a obvykle expedujeme do 24 až 48 hodin"
+		}
+	]
+}

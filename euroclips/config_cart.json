@@ -1,0 +1,23 @@
+{
+	"re_glass": "SKLO|sklo|agww|aguv|zrcadlo|eks|EKS|zrkadlo|Zrkadlo|Zrcadlo",
+	"re_post": "czpost_hand|czpost_post|czpost_recommended|UPS|SPS|DPD|sps|dpd",
+	"re_balikovna": "balikovna|zasilkovna|packeta",
+	"re_ppl": "PPL",
+	"re_dobirka": "dobírkou|Při převzetí|Dobierkou",
+	"re_atyp": "\\|atyp|\\[BA\\]|SET[0-9]",
+	"re_200": " 2m | 2m|\\(2m\\)",
+	"re_300": " 3m | 3m|\\(3m\\)",
+	"max_glass_a": 45,
+	"max_glass_b": 30,
+	"re_allow_glass": "paleta|paletka|křehké|Osobní|Osobně|Messenger|krehke|Indivi|BOX",
+	"max_post_a": 150,
+	"max_post_b": 80,
+	"max_balikovna_a": 55,
+	"max_balikovna_b": 48,
+	"max_ppl_a": 115,
+	"max_ppl_b": 55,
+	"weight_plexi": 3.71,
+	"weight_glass": 6.8,
+	"max_post_circuit": 300,
+	"max_post_circuit_width": 7
+}

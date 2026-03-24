@@ -1,0 +1,154 @@
+<style>
+	.tg {
+		padding: 50px;
+		flex-basis: 100%;
+		white-space: wrap;
+	}
+	.tg .btn {
+		font-weight: bold;
+		max-width: 300px;
+		font-size: 1em;
+	}
+	.tg .btn.active {
+		background-color: #479cf3;
+		border-bottom: 2px solid #1782f0;
+		color: white;
+	}
+	.tg-block {
+		display: flex;
+	}
+	.tg-block p {
+		padding: 10px 10px;
+		font-size: 0.9em;
+	}
+	.tg-block__left {
+		flex-basis: 50%;
+	}
+	.tg-block__right {
+		flex-basis: 50%;
+	}
+	
+	.step--2, .step--3 {
+		display: none;
+	}
+	.tg input.size {
+		width: 50px;
+	}
+	.tg .cart {
+		text-align: left;
+		margin: 0 auto;
+	}
+	.tg .cart td:first-child {
+		padding-right: 20px;
+	}
+	#blindFrameForm {
+		max-width: 450px;
+		width: 100%;
+		margin: 0 auto;
+	}
+	#blindFrameForm .c761 {
+		margin: 0;
+		border-radius: 4px;
+	}
+	#blindFrameForm .price-value {
+		font-size: 150%;
+		font-weight: bold;
+	}
+
+</style>
+
+
+<div class="tg c721">
+
+	<h2>1. Velikost obrazu</h2>
+	<div class="tg-block">
+		<div class="tg-block__left">
+		<a id="tg-presne" class="btn btn-third c397" href="#">Mám vlastní rám,<br> potřebuji přesný rozměr</a>
+			<p>
+				Plátno napneme tak, aby obraz přímo seděl do Vašeho rámu či výklenku. Vámi zadaný rozměr bude naprosto přesně dodržen.
+			</p>
+		</div>
+		
+		<div class="tg-block__right">
+		<a id="tg-dleobr" class="btn btn-third c397" href="#">Rozměr upravte<br> dle reálné velikosti obrazu</a>
+			<p>
+				Rozměr upravíme tak, aby výborně seděl dle reálné velikosti. Plátno přeměříme a&nbsp;v&nbsp;rámci milimetrů upravíme.
+			</p>
+		</div>
+	</div>
+	
+	
+	<div class="step step--2">
+		<h2>2. Způsob napnutí přes boky</h2>
+
+		<div class="tg-block">
+			<div class="tg-block__left">
+			<a id="tg-barva" class="btn btn-third c397" href="#">Barevné boky</a>
+				<p>
+					Obraz nebo fotografie plynule přesahuje do stran.
+				</p>
+			</div>
+
+			<div class="tg-block__right">
+			<a id="tg-bily" class="btn btn-third c397" href="#">Bílé boky</a>
+				<p>
+					Obraz je ukončen vpředu, boky zůstávají bílé.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	
+	<div class="step step--3">
+		<h2><span class="step__count"></span>. Přesné rozměry</h2>
+
+		<table class="cart">
+			<tbody>
+				<tr class="before_variants highlight">
+					<td>Šířka obrazu: </td>
+					<td>
+						<span class="fleft">
+							<input type="text" maxlength="6" id="tg-size-a" class="size" name="size-a" value=""><span class="count">&nbsp;cm</span>
+						</span>
+					</td>
+				</tr>
+				<tr class="before_variants highlight">
+					<td>Výška obrazu: </td>
+					<td>
+						<span class="fleft">
+							<input type="text" maxlength="6" id="tg-size-b" class="size" name="size-b" value=""><span class="count">&nbsp;cm</span>
+						</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
+
+</div>
+
+<form id="blindFrameForm" data-selector="product-buy-form" class="c751" action="/234020808/e-basket" method="post">
+	<div class="c754">
+		<div class="c761">
+			<div class="c762">
+				<div class="c2007">
+					<span class="c2009 price-value"></span>
+				</div>
+				<div class="c2010">
+					<div class="c2011 price-novat-value"></div>
+					<div class="c2013">bez DPH</div>
+				</div>
+			</div>
+			<div class="c331">
+				<input id="buy_btn" class="c332 btn c212 c1361" name="send_submit" value="Přidat do košíku" type="submit">
+			</div>
+		</div>
+	</div>
+	<div class="c764">
+		<span class="c766">Číslo produktu:</span>
+		<span class="c767" id="product-code"></span>
+	</div>
+</form>
+
+
+
