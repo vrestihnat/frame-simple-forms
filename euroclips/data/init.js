@@ -345,7 +345,7 @@ function fn() {
     var getConfig = $.ajax({
       crossDomain: true,
       type: 'GET',
-      url: $.euroclip.SHOP_SOURCE + 'config.json',
+      url: $.euroclip.SHOP_SOURCE + 'config.json?v=' + new Date().getTime(), // cache-busting',
       dataType: "json",
       success: function (data) {
         sessionStorage.setItem('config', JSON.stringify(data));
