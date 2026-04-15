@@ -978,10 +978,8 @@ function fn() {
             url: $.euroclip.SCRIPT_SOURCE + 'euroclip_model.js',
             dataType: "script"
           });
-          var a1 = ajaxCsvConfig('prices_euroklip', 'prices', true);
-          var a2 = ajaxCsvConfig('prices_euroklip_standard', 'prices_standard', true);
-
-          $.when(template, specific_model, a1, a2).done(function () {
+          // ceník i katalog standardů nyní poskytuje /api/euroclip/resolve
+          $.when(template, specific_model).done(function () {
             $.euroclip.load(defaultSizeA, defaultSizeB);
           });
 
