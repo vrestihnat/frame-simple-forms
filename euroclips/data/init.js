@@ -1294,10 +1294,9 @@ function fn() {
                 //nemelo by nastat
                 return false;
               }
-              // upgates: vložení do košíku přes URL
+              // upgates: vložení do košíku přes kód produktu z API
               var ks = parseFloat($("#kusy").val()).toFixed(0);
-              var cartUrl = clip.getPriceProductUri()
-                + "?addtocart=1"
+              var cartUrl = "/?addtocart=" + encodeURIComponent(clip.getPriceProductCode())
                 + "&quantity=" + ks
                 + "&productnote=" + encodeURIComponent(note)
                 + "&return=cart";
