@@ -40,11 +40,11 @@ $.extend($.euroclip.Frame.prototype, {
 				that.price = data.price.value;
 				that.setStandard(!!data.isStandard);
 
-				// upgates: URI produktové stránky pro addtocart
+				// upgates product_id pro AJAX addtocart
 				that.priceProductCode = data.code;
-				that.priceProductUri = "/p/" + data.uri;
-				that.priceProductId = 1;
-				$.euroclip.log("priceProductUri " + that.priceProductUri);
+				that.upgatesId = data.upgatesId;
+				that.priceProductId = data.upgatesId || 0;
+				$.euroclip.log("upgatesId " + that.upgatesId);
 
 				$(".euroclipconfig .price-value").html($.euroclip.formatPrice(that.price) + "&nbsp;" + $.euroclip.getCurrancy());
 				$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(data.price.valueNoVat) + "&nbsp;" + $.euroclip.getCurrancy());
@@ -69,8 +69,11 @@ $.extend($.euroclip.Frame.prototype, {
 		this.refreshProductCode();
 		return this;
 	},
-	getPriceProductUri: function () {
-		return this.priceProductUri;
+	getUpgatesId: function () {
+		return this.upgatesId;
+	},
+	getPriceProductId: function () {
+		return this.priceProductId;
 	},
 	getPriceProductCode: function () {
 		return this.priceProductCode;
