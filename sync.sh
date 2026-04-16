@@ -15,6 +15,7 @@ fi
   --exclude '.vscode/' \
   --exclude '.claude/' \
   --exclude '.sixth/' \
+  --exclude 'test-results/' \
   --exclude 'node_modules/' \
   --exclude '.DS_Store' \
   --exclude '*.swp' \

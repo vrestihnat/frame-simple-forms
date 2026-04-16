@@ -86,6 +86,28 @@ function fn() {
   $.euroclip.showDialog = function (text) {
     alert(text);
   }
+  $.euroclip.showCartSuccess = function () {
+    var msgs = {
+      cz: "Produkt byl přidán do košíku",
+      sk: "Produkt bol pridaný do košíka",
+      pl: "Produkt został dodany do koszyka"
+    };
+    var text = msgs[$.euroclip.LANG] || msgs["cz"];
+    var toast = $('<div class="ecf-toast-success">' + text + '</div>');
+    toast.css({
+      position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+      background: '#43a047', color: '#fff', padding: '14px 32px',
+      borderRadius: '8px', fontSize: '1.05em', fontWeight: '600',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.18)', zIndex: 99999,
+      opacity: 0, transition: 'opacity 0.3s'
+    });
+    $('body').append(toast);
+    setTimeout(function () { toast.css('opacity', 1); }, 10);
+    setTimeout(function () {
+      toast.css('opacity', 0);
+      setTimeout(function () { toast.remove(); }, 300);
+    }, 3000);
+  }
   $.euroclip.validateInput = function (elem) {
     var $elem = $(elem);
     var val = $elem.val().replace(".", ",").replace(/[^\d,]/g, '')
@@ -1296,6 +1318,7 @@ function fn() {
                 },
                 success: function (payload) {
                   $.nette.success(payload);
+                  $.euroclip.showCartSuccess();
                   // uložení productnote do cookie pro zobrazení v košíku
                   if (note) {
                     var notes = $.euroclip.getCookie("notes");
