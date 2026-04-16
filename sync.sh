@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sync local project to remote server via rsync
 
-LOCAL_DIR="$HOME/Documents/augment-projects/frame-simple-forms/"
+LOCAL_DIR="$HOME/Documents/augment_code/frame-simple-forms/"
 REMOTE_DIR="wwwadmin@ramari.cz:~/builds/git/dantik_web/app/frame-simple-forms/"
 
 EXTRA_ARGS=""
@@ -13,6 +13,8 @@ fi
 /usr/bin/rsync -avz --delete $EXTRA_ARGS \
   --exclude '.git/' \
   --exclude '.vscode/' \
+  --exclude '.claude/' \
+  --exclude '.sixth/' \
   --exclude 'node_modules/' \
   --exclude '.DS_Store' \
   --exclude '*.swp' \
