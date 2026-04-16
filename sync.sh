@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sync local project to remote server via rsync
 
-LOCAL_DIR="$HOME/Documents/augment_code/frame-simple-forms/"
+LOCAL_DIR="$HOME/Documents/augment-projects/frame-simple-forms/"
 REMOTE_DIR="wwwadmin@ramari.cz:~/builds/git/dantik_web/app/frame-simple-forms/"
 
 EXTRA_ARGS=""
