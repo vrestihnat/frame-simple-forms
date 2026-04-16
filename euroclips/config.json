@@ -24,28 +24,28 @@
 			"code": "EKP_K_atyp",
 			"label": "Euroklip PLEXI čiré",
 			"url": "ekp-k-atyp",
-			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat ve středu"
 		},
 		{
 			"group": "euroklip",
 			"code": "EKP_A_atyp",
 			"label": "Euroklip PLEXI antireflex",
 			"url": "ekp-a-atyp",
-			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat ve středu"
 		},
 		{
 			"group": "euroklip",
 			"code": "EKS_K_atyp",
 			"label": "Euroklip SKLO čiré",
 			"url": "eks-k-atyp",
-			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat ve středu"
 		},
 		{
 			"group": "euroklip",
 			"code": "EKS_A_atyp",
 			"label": "Euroklip SKLO antireflex",
 			"url": "eks-a-atyp",
-			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat v úterý"
+			"stock": "Objednávky přijaté do pátku 10:00 budeme expedovat ve středu"
 		},
 		{
 			"group": "base",
