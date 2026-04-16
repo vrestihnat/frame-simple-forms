@@ -40,11 +40,11 @@ $.extend($.euroclip.Frame.prototype, {
 				that.price = data.price.value;
 				that.setStandard(!!data.isStandard);
 
-				// upgates addtocart podle code z API (standard: EKS_K_18x24, atyp: ID-500)
+				// upgates: URI produktové stránky pro addtocart
 				that.priceProductCode = data.code;
-				that.priceProductUri = null;
+				that.priceProductUri = "/p/" + data.uri;
 				that.priceProductId = 1;
-				$.euroclip.log("priceProductCode " + that.priceProductCode);
+				$.euroclip.log("priceProductUri " + that.priceProductUri);
 
 				$(".euroclipconfig .price-value").html($.euroclip.formatPrice(that.price) + "&nbsp;" + $.euroclip.getCurrancy());
 				$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(data.price.valueNoVat) + "&nbsp;" + $.euroclip.getCurrancy());
