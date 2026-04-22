@@ -29,7 +29,6 @@ $.extend($.euroclip.Frame.prototype, {
 		this.xhr = $.ajax({
 			crossDomain: true,
 			type: 'POST',
-			async: false,
 			url: "https://api.ramari.cz/api/euroclip/resolve",
 			contentType: "application/json",
 			dataType: "json",

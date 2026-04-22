@@ -1195,18 +1195,29 @@ function fn() {
               e.preventDefault();
             }
           });
-          $("#size-a").keyup(function () {
-            clip.setSizeA($.euroclip.validateInput(this));
-          }).focusout(function () {
+          // debounce size changes so typing isn't interrupted by the resolve request;
+          // apply both sizes at once so a B-first-then-A sequence doesn't leave one stale
+          var sizeDebounce = null;
+          var scheduleSizeCommit = function () {
+            clearTimeout(sizeDebounce);
+            sizeDebounce = setTimeout(function () {
+              clip.sizeA = clip.validateSize($.euroclip.validateInput($("#size-a").get(0)) || 0);
+              clip.sizeB = clip.validateSize($.euroclip.validateInput($("#size-b").get(0)) || 0);
+              if ($.euroclip.currentGroup != "euroklip") {
+                clip.refreshBases();
+              }
+              clip.refreshSizeLabels();
+              clip.refreshPrice();
+            }, 350);
+          };
+          $("#size-a").keyup(scheduleSizeCommit).focusout(function () {
             if (parseFloat($(this).val()) < 9) {
               $(this).val(9).keyup();
               $.euroclip.showDialog("Omlouváme se, minimální šířka obrázku je 9 cm.");
             }
           });
 
-          $("#size-b").keyup(function () {
-            clip.setSizeB($.euroclip.validateInput(this));
-          }).focusout(function () {
+          $("#size-b").keyup(scheduleSizeCommit).focusout(function () {
             if (parseFloat($(this).val()) < 9) {
               $(this).val(9).keyup();
               $.euroclip.showDialog("Omlouváme se, minimální výška obrázku je 9 cm.");
