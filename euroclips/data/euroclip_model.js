@@ -40,11 +40,11 @@ $.extend($.euroclip.Frame.prototype, {
 				that.price = data.price.value;
 				that.setStandard(!!data.isStandard);
 
-				// upgates product_id pro AJAX addtocart
 				that.priceProductCode = data.code;
 				that.upgatesId = data.upgatesId;
 				that.priceProductId = data.upgatesId || 0;
-				$.euroclip.log("upgatesId " + that.upgatesId);
+				that.priceProductUri = data.uri || "";
+				$.euroclip.log("upgatesId " + that.upgatesId + " uri " + that.priceProductUri);
 
 				$(".euroclipconfig .price-value").html($.euroclip.formatPrice(that.price) + "&nbsp;" + $.euroclip.getCurrancy());
 				$(".euroclipconfig .price-novat-value").html($.euroclip.formatPrice(data.price.valueNoVat) + "&nbsp;" + $.euroclip.getCurrancy());

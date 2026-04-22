@@ -20,4 +20,6 @@ fi
   --exclude '.DS_Store' \
   --exclude '*.swp' \
   --exclude 'sync.sh' \
+  --exclude '.mcp.json' \
+  --exclude '.gitignore' \
   "$LOCAL_DIR" "$REMOTE_DIR"

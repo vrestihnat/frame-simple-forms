@@ -1287,7 +1287,7 @@ function fn() {
           $('#buy_btn').on('click', function (e) {
             e.stopPropagation();
 
-            if (clip.getPrice() > 0 && clip.getPriceProductId() > 0) {
+            if (clip.getPrice() > 0 && clip.getPriceProductId() > 0 && clip.getPriceProductUri()) {
 
               var note = "";
               if (!clip.isStandard()) {
@@ -1295,7 +1295,6 @@ function fn() {
               }
 
               /* pokud nastala chyba a objednává se prázdný konfugurátor */
-              /* TODO: zde by měly být asi ID všech konfigurátorů...?? */
               if (clip.getPriceProductId() == 5 || clip.getPriceProductId() == 10 || clip.getPriceProductId() == 15 || clip.getPriceProductId() == 20) {
                 return false;
               }
@@ -1304,35 +1303,16 @@ function fn() {
                 //nemelo by nastat
                 return false;
               }
-              // upgates: vložení do košíku přes AJAX s product_id
+
+              // upgates: vložení do košíku přes veřejnou URL s productnote
               var ks = parseFloat($("#kusy").val()).toFixed(0);
-              var addCartUrl = window.location.pathname + "?do=addCart";
-              $.euroclip.log("upgates addCart: product_id=" + clip.getUpgatesId() + " qty=" + ks);
-              $.ajax({
-                type: 'GET',
-                url: addCartUrl,
-                data: {
-                  product_id: clip.getUpgatesId(),
-                  quantity: ks,
-                  option_set_id: null
-                },
-                success: function (payload) {
-                  $.nette.success(payload);
-                  $.euroclip.showCartSuccess();
-                  // uložení productnote do cookie pro zobrazení v košíku
-                  if (note) {
-                    var notes = $.euroclip.getCookie("notes");
-                    notes = notes ? JSON.parse(notes) : [];
-                    notes.push(encodeURI(note));
-                    var date = new Date();
-                    date.setDate(date.getDate() + 1);
-                    document.cookie = 'notes=' + JSON.stringify(notes) + '; path=/; expires=' + date.toGMTString();
-                  }
-                },
-                error: function () {
-                  $.euroclip.showDialog("Nepodařilo se přidat do košíku.");
-                }
-              });
+              var cartUrl = clip.getPriceProductUri()
+                + "?addtocart=1"
+                + "&quantity=" + ks
+                + (note ? "&productnote=" + encodeURIComponent(note) : "")
+                + "&return=cart";
+              $.euroclip.log("upgates cart redirect: " + cartUrl);
+              window.location.href = cartUrl;
             }
 
             return false;
