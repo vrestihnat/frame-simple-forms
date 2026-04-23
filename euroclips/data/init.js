@@ -722,45 +722,7 @@ function fn() {
     });
 
     /*
-     * Napínání plátna
-     */
-  } else if (href == "/napnuti-obrazu-na-platne-postou" /*+ $.euroclip.ADDR_BASKET_3*/) {
-    $.euroclip.log("Napínání");
-
-    $.euroclip.HOLDER.html('<img src="' + $.euroclip.SCRIPT_SOURCE + 'loading.svg" style="width:64px;height:64px;margin:100px auto">').addClass("tensioning").attr('id', 'tensioning');
-
-    var template = $.ajax({
-      crossDomain: true,
-      type: 'GET',
-      url: $.euroclip.SCRIPT_SOURCE + 'tensioning_template.html',
-      dataType: "html",
-      success: function (data) {
-        $.euroclip.HOLDER.html(data);
-        if ($.euroclip.currentGroup == "euroklip") {
-          $("#colors").hide();
-        }
-      }
-    });
-    var specific_model = $.ajax({
-      crossDomain: true,
-      type: 'GET',
-      url: $.euroclip.SCRIPT_SOURCE + 'tensioning_model.js',
-      dataType: "script"
-    });
-
-    if (sessionStorage.getItem('config')) {
-      $.extend($.euroclip, JSON.parse(sessionStorage.getItem('config')));
-      $.when(template, specific_model).done(function () {
-        $.euroclip.loadTensioning();
-      });
-    } else {
-      $.when(template, specific_model, getConfig).done(function () {
-        $.euroclip.loadTensioning();
-      });
-    }
-
-    /*
-     * NĚCO JINÉHO - euroklip nebo frame
+     * NĚCO JINÉHO - euroklip
      */
   } else {
 
@@ -1012,33 +974,6 @@ function fn() {
           $.when(template, specific_model).done(function () {
             $.euroclip.load(defaultSizeA, defaultSizeB);
           });
-
-        } else {
-          var template = $.ajax({
-            crossDomain: true,
-            type: 'GET',
-            url: $.euroclip.SCRIPT_SOURCE + 'frame_template.html',
-            dataType: "html",
-            success: function (data) {
-              $.euroclip.HOLDER.html(data);
-            }
-          });
-          var specific_model = $.ajax({
-            crossDomain: true,
-            type: 'GET',
-            url: $.euroclip.SCRIPT_SOURCE + 'frame_model.html',
-            dataType: "script"
-          });
-
-          if ($.euroclip.bars && $.euroclip.glasses && $.euroclip.bases) {
-            $.when(template, specific_model).done(function () {
-              $.euroclip.load(defaultSizeA, defaultSizeB);
-            });
-          } else {
-            $.when(getBars, getGoods, template, specific_model).done(function () {
-              $.euroclip.load(defaultSizeA, defaultSizeB);
-            });
-          }
 
         }
 
