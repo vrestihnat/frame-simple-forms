@@ -282,95 +282,6 @@ function fn() {
   }
 
 
-  if (!sessionStorage.getItem('components')) {
-    var getBars = $.ajax({
-      crossDomain: true,
-      type: 'GET',
-      url: "https://api.ramari.cz/api/enum_mouldings?webramovani=true",
-      headers: {
-        Accept: "application/json"
-      },
-      success: function (data) {
-        var parsedBars = [];
-        for (var i = 0; i < data.length; i++) {
-          var obj = {};
-
-          obj["profile"] = parseInt(data[i]["profil"]);
-          obj["code"] = data[i]["cis3"];
-          obj["color_cz"] = data[i]["webnazevcz"];
-          obj["color_sk"] = data[i]["webnazevsk"];
-          obj["price_vat"] = parseFloat(data[i]["cenamo"]);
-          obj["price_fix"] = parseFloat(data[i]["cena1ram"]);
-          obj["img_frame"] = "../fotos/RamarskyMaterial/Listy/" + data[i]["cis3"] + ".jpg";
-          obj["img_profile"] = "../fotos/RamarskyMaterial/Profily/profil" + obj["profile"] + ".jpg";
-          obj["border"] = parseInt(data[i]["okraj1"]) / 10;
-
-          parsedBars.push(obj);
-        }
-
-        $.euroclip.bars = parsedBars;
-      }
-    });
-
-    var getGoods = $.ajax({
-      crossDomain: true,
-      type: 'GET',
-      url: "https://api.ramari.cz/api/enumgoods?webramovani=true",
-      headers: {
-        Accept: "application/json"
-      },
-      success: function (data) {
-        var parsedGlasses = [];
-        var parsedBases = [];
-
-        for (var i = 0; i < data.length; i++) {
-          var obj = {};
-
-          obj["code"] = data[i]["klasifikace"];
-          obj["name_cz"] = data[i]["webnazevcz"];
-          obj["name_sk"] = data[i]["webnazevsk"];
-          obj["price_vat"] = parseFloat(data[i]["cenamo"]);
-          obj["price_fix"] = parseFloat(data[i]["mofix"]);
-          obj["url"] = data[i]["url"];
-          obj["img"] = "../fotos/RamarskyMaterial/Deskovy_material/" + data[i]["klasifikace"] + ".jpg";
-
-          if (data[i]["jesklo"] == true) {
-            parsedGlasses.push(obj);
-          } else if (data[i]["jepodklad"] == true) {
-            if (parseInt(data[i]["rozmerx"]) > parseInt(data[i]["rozmery"])) {
-              obj["upTo"] = parseInt(data[i]["rozmery"]) + "x" + parseInt(data[i]["rozmerx"]);
-            } else {
-              obj["upTo"] = parseInt(data[i]["rozmerx"]) + "x" + parseInt(data[i]["rozmery"]);
-            }
-            parsedBases.push(obj);
-          }
-        }
-
-        function sortByPrice(a, b) {
-          if (a.price_vat > b.price_vat) {
-            return 1;
-          } else {
-            return -1;
-          }
-        }
-
-        $.euroclip.glasses = parsedGlasses;
-        $.euroclip.bases = parsedBases.sort(sortByPrice);
-      }
-    });
-
-    $.when(getBars, getGoods).done(function () {
-      sessionStorage.setItem('components', JSON.stringify([$.euroclip.bars, $.euroclip.glasses, $.euroclip.bases]));
-    });
-
-  } else {
-    var obj = JSON.parse(sessionStorage.getItem('components'));
-    $.euroclip.bars = obj[0];
-    $.euroclip.glasses = obj[1];
-    $.euroclip.bases = obj[2];
-  }
-
-
   if (!sessionStorage.getItem('config')) {
     var getConfig = $.ajax({
       crossDomain: true,
@@ -818,11 +729,7 @@ function fn() {
             return this.type;
           },
           getTypeLabel: function () {
-            if ($.euroclip.currentGroup == "euroklip" || this.getHasFrame()) {
-              return this.type.label;
-            } else {
-              return "";
-            }
+            return this.type.label;
           },
           getSizeA: function () {
             if (this.sizeA > this.sizeB) {
@@ -872,20 +779,13 @@ function fn() {
               }
             }
             $(".euroclipconfig .stock").text(this.type.stock);
-
-            // krom euroklipů je volání přesunuto k výpočtu ceny
-            if ($.euroclip.currentGroup == "euroklip") {
-              $(".euroclipconfig .label-clip-type").text(this.getTypeLabel());
-              this.updateImage();
-            }
+            $(".euroclipconfig .label-clip-type").text(this.getTypeLabel());
+            this.updateImage();
 
             return this;
           },
           setSizeA: function (size) {
             this.sizeA = this.validateSize(size);
-            if ($.euroclip.currentGroup != "euroklip") {
-              this.refreshBases();
-            }
             this.refreshPrice();
             this.refreshSizeLabels();
 
@@ -893,9 +793,6 @@ function fn() {
           },
           setSizeB: function (size) {
             this.sizeB = this.validateSize(size);
-            if ($.euroclip.currentGroup != "euroklip") {
-              this.refreshBases();
-            }
             this.refreshPrice();
             this.refreshSizeLabels();
 
@@ -915,45 +812,10 @@ function fn() {
               size = 9;
             }
             return size;
-          },
-          refreshColors: function () {}, // pouze pro frame
-          refreshGlasses: function () {} // pouze pro frame
+          }
         }
 
         if ($.euroclip.currentGroup === "euroklip") {
-
-          ajaxCsvConfig = function (filename, type, floatItems) {
-            return $.ajax({
-              crossDomain: true,
-              type: 'GET',
-              url: $.euroclip.SHOP_SOURCE + filename + '.csv',
-              dataType: "text",
-              success: function (csv) {
-                var lines = csv.trim().split(/\r\n|\n/);
-                var result = [];
-                var headers = lines[0].split(";");
-
-                for (var i = 1; i < lines.length; i++) {
-                  var obj = {};
-                  var currentline = lines[i].split(";");
-
-                  for (var j = 0; j < headers.length; j++) {
-                    if (floatItems) {
-                      obj[headers[j]] = parseFloat(currentline[j].replace(",", "."));
-                    } else {
-                      obj[headers[j]] = currentline[j].replace(",", ".");
-                    }
-                  }
-                  result.push(obj);
-                }
-                if (type === "prices") {
-                  $.euroclip.prices = result;
-                } else if (type === "prices_standard") {
-                  $.euroclip.prices_standard = result;
-                }
-              }
-            });
-          }
 
           var template = $.ajax({
             crossDomain: true,
@@ -981,30 +843,17 @@ function fn() {
 
         $.euroclip.load = function (defaultSizeA, defaultSizeB) {
 
-          // naplnění typů
+          // naplnění typů euroklipů
           var $frameType = $("#frame-type");
-
-          if ($.euroclip.currentGroup == "euroklip") {
-            $($.euroclip.products).each(function (i, item) {
-              if ($.euroclip.currentGroup == item.group) { // pouze euroklipy
-                if (item.code == $.euroclip.currentProduct.code) {
-                  $frameType.append('<option value="' + item.code + '" selected>' + item.label + '</option>');
-                } else {
-                  $frameType.append('<option value="' + item.code + '">' + item.label + '</option>');
-                }
+          $($.euroclip.products).each(function (i, item) {
+            if (item.group === "euroklip") {
+              if (item.code == $.euroclip.currentProduct.code) {
+                $frameType.append('<option value="' + item.code + '" selected>' + item.label + '</option>');
+              } else {
+                $frameType.append('<option value="' + item.code + '">' + item.label + '</option>');
               }
-            });
-          } else {
-            $($.euroclip.products).each(function (i, item) {
-              if (item.group == "frame") { // pouze rámy, ne euroklipy, skla, podklady
-                if (item.group == $.euroclip.currentProduct.group) {
-                  $frameType.append('<option value="' + item.code + '" selected>' + item.label + '</option>');
-                } else {
-                  $frameType.append('<option value="' + item.code + '">' + item.label + '</option>');
-                }
-              }
-            });
-          }
+            }
+          });
 
 
           // založení objektu
@@ -1014,19 +863,11 @@ function fn() {
           // funkce pro aktualizaci popisu zboží
           function updateTextContent() {
             var url = "";
-            if ($.euroclip.currentGroup == "euroklip") {
-              for (var i = 0; i < $.euroclip.products.length; i++) {
-                if ($.euroclip.products[i].code === clip.getType().code) {
-                  url = $.euroclip.products[i].url;
-                  break;
-                }
+            for (var i = 0; i < $.euroclip.products.length; i++) {
+              if ($.euroclip.products[i].code === clip.getType().code) {
+                url = $.euroclip.products[i].url;
+                break;
               }
-            } else if (clip.getHasFrame()) {
-              url = clip.type.url;
-            } else if (clip.getHasGlass()) {
-              url = clip.glass.url;
-            } else if (clip.getHasBase()) {
-              url = clip.base.url;
             }
 
             if (url != "") {
@@ -1051,85 +892,19 @@ function fn() {
             }
           }
 
-          // odchytávání událostí - změna typu (Euroklip - SKLA; Frame: galerka, kostička...)
+          // změna typu euroklipu
           $frameType.change(function () {
             if ($(this).val() != 0) {
               clip.setType($(this).val());
-              if ($.euroclip.currentGroup != "euroklip") {
-                clip.refreshColors();
-                clip.setHasFrame(true);
-                $("#color").change();
-                $("#colors").show();
-              } else {
-                $("#colors").hide();
-                clip.refreshPrice();
-              }
-            } else {
-              clip.setHasFrame(false);
-              $("#colors").hide();
               clip.refreshPrice();
-
+            } else {
+              clip.refreshPrice();
               $("#description").html("");
             }
             updateTextContent();
           });
 
-          if ($.euroclip.currentGroup != "euroklip") {
-
-            // naplnění barev (typů lišt)
-            if ($.euroclip.bars) {
-              clip.refreshColors();
-              $("#colors").show();
-
-              // odchytávání událostí
-              $("#color").change(function () {
-                clip.setColor($(this).val());
-                clip.refreshPrice();
-              }).change();
-            }
-
-            // naplnění skel
-            if ($.euroclip.glasses) {
-              clip.refreshGlasses();
-              $("#glasses").show();
-
-              // odchytávání událostí
-              $("#glass").change(function () {
-                if ($(this).val() != 0) {
-                  clip.setGlass($(this).val());
-                  clip.setHasGlass(true);
-                } else {
-                  clip.setHasGlass(false);
-                }
-                clip.refreshPrice();
-                updateTextContent();
-              }).change();
-            }
-
-            // podklady
-            if ($.euroclip.bases) {
-              clip.refreshBases();
-              $("#base").change(function () {
-                if ($(this).val() != 0) {
-                  clip.setBase($(this).val());
-                  clip.setHasBase(true);
-                } else {
-                  clip.setHasBase(false);
-                }
-                clip.refreshPrice();
-                updateTextContent();
-              }).change();
-            }
-
-            /* háčky a podklady */
-
-            $("#hook").change(function () {
-              clip.setHasHooks($(this).val());
-              clip.refreshPrice();
-            });
-          } else {
-            $("#colors").hide();
-          }
+          $("#colors").hide();
 
           $("#size-a, #size-b").keydown(function (e) {
             // omezení všeho kromě číslic, ,. , šipek, backspace, del, tab
@@ -1146,9 +921,6 @@ function fn() {
             sizeDebounce = setTimeout(function () {
               clip.sizeA = clip.validateSize($.euroclip.validateInput($("#size-a").get(0)) || 0);
               clip.sizeB = clip.validateSize($.euroclip.validateInput($("#size-b").get(0)) || 0);
-              if ($.euroclip.currentGroup != "euroklip") {
-                clip.refreshBases();
-              }
               clip.refreshSizeLabels();
               clip.refreshPrice();
             }, 350);
@@ -1179,51 +951,6 @@ function fn() {
             clip.setComplete($(this).is(":checked"));
             clip.refreshPrice();
           });
-
-
-          /*
-           * pouze podklad - produkt
-           */
-          if ($.euroclip.currentGroup == "base") {
-            $("#complete").prop("checked", false).change();
-            $("#frame-type, #glass").val(0).change();
-
-            $("#complete2-checkbox").show();
-            $("#frames, #colors, #glasses, #complete-checkbox").hide();
-
-            $("#base").val($.euroclip.currentProduct.code).change();
-
-            $("#complete2").change(function () {
-              if ($(this).is(":checked")) {
-                $("#frames, #glasses").show();
-              } else {
-                $("#frames, #colors, #glasses").hide();
-                $("#frame-type, #glass").val(0).change();
-              }
-            });
-          }
-          /*
-           * pouze sklo - produkt
-           */
-          if ($.euroclip.currentGroup == "glass") {
-            $("#complete").prop("checked", false).change();
-            $("#frame-type, #base").val(0).change();
-
-            $("#complete2-checkbox").show();
-            $("#frames, #colors, #bases, #complete-checkbox").hide();
-
-            $("#glass").val($.euroclip.currentProduct.code).change();
-
-            $("#complete2").change(function () {
-              if ($(this).is(":checked")) {
-                $("#frames, #bases").show();
-              } else {
-                $("#frames, #colors, #bases").hide();
-                $("#frame-type, #glass").val(0).change();
-              }
-            });
-          }
-
 
 
 
