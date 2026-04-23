@@ -1316,13 +1316,15 @@ function fn() {
               }
 
               // upgates: vložení do košíku přes veřejnou URL s productnote;
-              // return=<konfigurátor> aby uživatel zůstal na stránce a formulář se zresetoval
+              // return=<konfigurátor>?added=1 aby uživatel zůstal na stránce,
+              // formulář se zresetoval a flag spustí toast po reloadu
               var ks = parseFloat($("#kusy").val()).toFixed(0);
+              var returnUrl = window.location.pathname + "?added=1";
               var cartUrl = clip.getPriceProductUri()
                 + "?addtocart=1"
                 + "&quantity=" + ks
                 + (note ? "&productnote=" + encodeURIComponent(note) : "")
-                + "&return=" + encodeURIComponent(window.location.pathname);
+                + "&return=" + encodeURIComponent(returnUrl);
               $.euroclip.log("upgates cart redirect: " + cartUrl);
               window.location.href = cartUrl;
             }
@@ -1331,6 +1333,15 @@ function fn() {
           });
 
           $.euroclip.log("Loaded!");
+
+          // toast po redirectu z addtocart — URL flag ?added=1 + cleanup URL aby se toast
+          // neobjevil při pozdějším refresh
+          if (window.location.search.indexOf("added=1") >= 0) {
+            setTimeout(function () { $.euroclip.showCartSuccess(); }, 100);
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }
 
         };
       } else {
