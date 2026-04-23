@@ -106,8 +106,16 @@ function fn() {
     setTimeout(function () {
       toast.css('opacity', 0);
       setTimeout(function () { toast.remove(); }, 300);
-    }, 3000);
+    }, 5000);
   }
+  // toast po redirectu z addtocart — flag nastavený před window.location.href
+  try {
+    if (window.sessionStorage && sessionStorage.getItem('euroclip_cart_added') === '1') {
+      sessionStorage.removeItem('euroclip_cart_added');
+      $.euroclip.log('[euroclip] cart-added flag detected, showing toast');
+      $.euroclip.showCartSuccess();
+    }
+  } catch (e) {}
   $.euroclip.validateInput = function (elem) {
     var $elem = $(elem);
     var val = $elem.val().replace(".", ",").replace(/[^\d,]/g, '')
@@ -1316,15 +1324,15 @@ function fn() {
               }
 
               // upgates: vložení do košíku přes veřejnou URL s productnote;
-              // return=<konfigurátor>?added=1 aby uživatel zůstal na stránce,
-              // formulář se zresetoval a flag spustí toast po reloadu
+              // return=<konfigurátor> aby uživatel zůstal na stránce a formulář se zresetoval;
+              // flag pro toast v sessionStorage přežije redirect a přečte ho init.js při reloadu
               var ks = parseFloat($("#kusy").val()).toFixed(0);
-              var returnUrl = window.location.pathname + "?added=1";
               var cartUrl = clip.getPriceProductUri()
                 + "?addtocart=1"
                 + "&quantity=" + ks
                 + (note ? "&productnote=" + encodeURIComponent(note) : "")
-                + "&return=" + encodeURIComponent(returnUrl);
+                + "&return=" + encodeURIComponent(window.location.pathname);
+              try { sessionStorage.setItem('euroclip_cart_added', '1'); } catch (e) {}
               $.euroclip.log("upgates cart redirect: " + cartUrl);
               window.location.href = cartUrl;
             }
@@ -1333,15 +1341,6 @@ function fn() {
           });
 
           $.euroclip.log("Loaded!");
-
-          // toast po redirectu z addtocart — URL flag ?added=1 + cleanup URL aby se toast
-          // neobjevil při pozdějším refresh
-          if (window.location.search.indexOf("added=1") >= 0) {
-            setTimeout(function () { $.euroclip.showCartSuccess(); }, 100);
-            if (window.history && window.history.replaceState) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          }
 
         };
       } else {
