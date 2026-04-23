@@ -1315,13 +1315,14 @@ function fn() {
                 return false;
               }
 
-              // upgates: vložení do košíku přes veřejnou URL s productnote
+              // upgates: vložení do košíku přes veřejnou URL s productnote;
+              // return=<konfigurátor> aby uživatel zůstal na stránce a formulář se zresetoval
               var ks = parseFloat($("#kusy").val()).toFixed(0);
               var cartUrl = clip.getPriceProductUri()
                 + "?addtocart=1"
                 + "&quantity=" + ks
                 + (note ? "&productnote=" + encodeURIComponent(note) : "")
-                + "&return=cart";
+                + "&return=" + encodeURIComponent(window.location.pathname);
               $.euroclip.log("upgates cart redirect: " + cartUrl);
               window.location.href = cartUrl;
             }
