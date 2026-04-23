@@ -282,15 +282,17 @@ function fn() {
   }
 
 
-  if (!sessionStorage.getItem('config')) {
+  if (!sessionStorage.getItem('config_v2')) {
     var getConfig = $.ajax({
       crossDomain: true,
       type: 'GET',
-      url: $.euroclip.SHOP_SOURCE + 'config.json?v=' + new Date().getTime(), // cache-busting',
+      url: 'https://api.ramari.cz/api/configurator/config?lang=' + $.euroclip.LANG,
       dataType: "json",
       success: function (data) {
-        sessionStorage.setItem('config', JSON.stringify(data));
-        $.extend($.euroclip, data);
+        // API vrací { lang, settings, products } — klient používá settings + products
+        var payload = { settings: data.settings, products: data.products };
+        sessionStorage.setItem('config_v2', JSON.stringify(payload));
+        $.extend($.euroclip, payload);
       }
     });
   }
@@ -1017,8 +1019,8 @@ function fn() {
       }
     }
 
-    if (sessionStorage.getItem('config')) {
-      $.extend($.euroclip, JSON.parse(sessionStorage.getItem('config')));
+    if (sessionStorage.getItem('config_v2')) {
+      $.extend($.euroclip, JSON.parse(sessionStorage.getItem('config_v2')));
       $.euroclip.setup();
     } else {
       $.when(getConfig).done(function () {
