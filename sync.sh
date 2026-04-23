@@ -16,7 +16,13 @@ fi
   --exclude '.claude/' \
   --exclude '.sixth/' \
   --exclude 'test-results/' \
+  --exclude 'playwright-report/' \
+  --exclude '.playwright-mcp/' \
   --exclude 'node_modules/' \
+  --exclude 'package.json' \
+  --exclude 'package-lock.json' \
+  --exclude 'playwright.config.js' \
+  --exclude 'tests/' \
   --exclude '.DS_Store' \
   --exclude '*.swp' \
   --exclude 'sync.sh' \
