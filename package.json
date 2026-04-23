@@ -1,0 +1,14 @@
+{
+  "name": "frame-simple-forms",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Euroklip configurator embedded into Upgates e-shop (DANTIK)",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

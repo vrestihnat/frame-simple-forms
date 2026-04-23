@@ -1,5 +1,6 @@
 .mcp.json
 test-results/
+playwright-report/
 .playwright-mcp/
 .DS_Store
 node_modules/
