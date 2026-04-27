@@ -841,11 +841,18 @@ function fn() {
       // podporované formáty:
       //   #20x30        kompaktní
       //   #a=20&b=30    parametrický (alias x=, y=)
+      // U euroklipů aplikujeme ihned (refreshPrice volá API).
+      // U rámů/skel/podkladů odložíme — frame_model.refreshPrice() potřebuje
+      // this.color/this.glass/this.base, které se naplní až později v $.euroclip.load.
       var hashSizes = parseHashSizes(window.location.hash);
       if (hashSizes) {
-        defaultSizeA = hashSizes.a;
-        defaultSizeB = hashSizes.b;
-        $.euroclip.log("hash sizes: " + defaultSizeA + "x" + defaultSizeB);
+        $.euroclip.log("hash sizes: " + hashSizes.a + "x" + hashSizes.b);
+        if ($.euroclip.currentGroup === "euroklip") {
+          defaultSizeA = hashSizes.a;
+          defaultSizeB = hashSizes.b;
+        } else {
+          $.euroclip._pendingHashSizes = hashSizes;
+        }
       }
 
       // pokud víme typ - můžeme spustit
@@ -1405,6 +1412,17 @@ function fn() {
 
             return false;
           });
+
+          // aplikuj odložené hash rozměry (rámy/skla/podklady) — selectboxy už jsou naplněné
+          if ($.euroclip._pendingHashSizes) {
+            var hs = $.euroclip._pendingHashSizes;
+            $.euroclip._pendingHashSizes = null;
+            $("#size-a").val(hs.a);
+            $("#size-b").val(hs.b);
+            // simulujeme user input — handlery vyřeší setSizeA/setSizeB + refreshPrice
+            $("#size-a").trigger("keyup");
+            $("#size-b").trigger("keyup");
+          }
 
           $.euroclip.log("Loaded!");
 
