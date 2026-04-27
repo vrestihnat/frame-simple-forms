@@ -236,7 +236,37 @@ $(function () { loadFrameFormData(); });
 
 ---
 
-## 5. Detekce jazyka
+## 5. Předvyplnění rozměrů z URL hashe
+
+Konfigurátor podporuje sdílení odkazu s konkrétními rozměry přes URL hash.
+Junior to nemusí implementovat sám — euroklip už to umí ([init.js:691-720](../euroclips/data/init.js#L691-L720))
+a stejnou logiku stačí použít i pro rámy. Stačí vědět, že to existuje.
+
+Podporované formáty (lze míchat):
+
+| URL | Rozměry |
+|---|---|
+| `https://www.dantik.cz/p/ekp-k-atyp#15x20` | 15 × 20 cm |
+| `https://www.dantik.cz/p/ekp-k-atyp#a=15&b=20` | 15 × 20 cm |
+| `https://www.dantik.cz/p/ekp-k-atyp#x=15&y=20` | 15 × 20 cm (alias) |
+
+Hash má **prioritu nad path** — pokud je URL `/p/EKP-K-atyp-19x43#10x20`,
+zobrazí se 10×20.
+
+Helper je v `init.js`:
+```js
+function parseHashSizes(hash) {
+  // viz init.js – sdílíme s euroklipem
+}
+```
+
+Pro rámy bys to **využil pro generování shareable linků** — např. když user
+vyplní 30×40 cm a klikne "Sdílet konfiguraci", vygeneruj
+`location.pathname + '#a=30&b=40'`.
+
+---
+
+## 6. Detekce jazyka
 
 Viz [`init.js`](../euroclips/data/init.js) řádky 57–73 — projekt už má konstantu
 `$.euroclip.LANG`:
@@ -257,7 +287,7 @@ Při volání API **vždy předej `?lang=${LANG}`**, u `enum_mouldings` a
 
 ---
 
-## 6. Cache v sessionStorage
+## 7. Cache v sessionStorage
 
 Pro snížení počtu requestů se v projektu cachuje config mezi navigacemi (per-tab):
 
@@ -274,7 +304,7 @@ klíče (`_v2`, `_v3`), jinak klienti uvidí starý cache.
 
 ---
 
-## 7. Na co si dát pozor
+## 8. Na co si dát pozor
 
 1. **Typy porovnávání** — `frame.code` je string (`"114"`), `mouldings.profil` je integer (`114`). Vždy převeď na stejný typ:
    ```js
@@ -288,7 +318,7 @@ klíče (`_v2`, `_v3`), jinak klienti uvidí starý cache.
 
 ---
 
-## 8. Od ceny k ID produktu: `rounded_bohemian_product`
+## 9. Od ceny k ID produktu: `rounded_bohemian_product`
 
 Když máš spočítanou cenu (např. `489.50 Kč`), musíš ji zaokrouhlit na nejbližší
 **cenovou hladinu** — to je produkt, který v Upgatesu reálně existuje a do
@@ -346,7 +376,7 @@ U rámu počítáš client-side, takže si `rounded_bohemian_product` **voláš 
 
 ---
 
-## 9. Přidání do košíku
+## 10. Přidání do košíku
 
 Stejný mechanismus jako atyp euroklip (viz
 [init.js:1253-1280](../euroclips/data/init.js#L1253-L1280)).
@@ -422,7 +452,7 @@ if (clip.getPrice() > 0
 
 ---
 
-## 10. Reference na starý kód
+## 11. Reference na starý kód
 
 Kdybys chtěl vidět, jak frontend dělal ty samé věci před přesunem na API,
 podívej se do git historie:
@@ -445,7 +475,7 @@ git show c8ba221^:euroclips/data/init.js | less
 
 ---
 
-## 11. Existující euroklip jako předloha
+## 12. Existující euroklip jako předloha
 
 Aktuální euroklip řešení je **výrazně jednodušší** (jen jeden select typu),
 ale principy fetchování jsou stejné:
@@ -459,7 +489,7 @@ selectboxy a dynamickým `#color`.
 
 ---
 
-## 12. Checklist před PR
+## 13. Checklist před PR
 
 **Naplnění formuláře (sekce 1–7):**
 - [ ] Všechny 3 endpointy se volají paralelně (`Promise.all`)

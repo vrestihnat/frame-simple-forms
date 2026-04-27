@@ -122,6 +122,37 @@ function fn() {
     $elem.val(val);
     return val;
   }
+  /**
+   * Parse rozměrů z URL hashe.
+   * Formáty:
+   *   #20x30          kompaktní (NxM)
+   *   #a=20&b=30      parametrický (aliasy x= a y=)
+   * Vrací { a: number, b: number } nebo null.
+   */
+  function parseHashSizes(hash) {
+    if (!hash) return null;
+    var raw = String(hash).replace(/^#\/?/, '');
+    if (!raw) return null;
+
+    var compact = raw.match(/^(\d+(?:[.,]\d+)?)x(\d+(?:[.,]\d+)?)$/i);
+    if (compact) {
+      return { a: parseFloat(compact[1].replace(',', '.')), b: parseFloat(compact[2].replace(',', '.')) };
+    }
+
+    var params = {};
+    raw.split('&').forEach(function (pair) {
+      var eq = pair.indexOf('=');
+      if (eq > 0) params[pair.slice(0, eq).toLowerCase()] = decodeURIComponent(pair.slice(eq + 1));
+    });
+    var a = params.a || params.x;
+    var b = params.b || params.y;
+    if (a && b) {
+      var fa = parseFloat(String(a).replace(',', '.'));
+      var fb = parseFloat(String(b).replace(',', '.'));
+      if (fa > 0 && fb > 0) return { a: fa, b: fb };
+    }
+    return null;
+  }
   $.euroclip.formatPrice = function (price) {
     price = parseFloat(price).toFixed(2).replace(".", ",");
     return price.replace(/./g, function (c, i, a) {
@@ -673,6 +704,17 @@ function fn() {
           defaultSizeA = parseInt(result[3]);
           defaultSizeB = parseInt(result[4]);
         }
+      }
+
+      // override rozměrů z URL hashe — sdílení odkazů s předvyplněnými rozměry
+      // podporované formáty:
+      //   #20x30        kompaktní
+      //   #a=20&b=30    parametrický (alias x=, y=)
+      var hashSizes = parseHashSizes(window.location.hash);
+      if (hashSizes) {
+        defaultSizeA = hashSizes.a;
+        defaultSizeB = hashSizes.b;
+        $.euroclip.log("hash sizes: " + defaultSizeA + "x" + defaultSizeB);
       }
 
       // pokud víme typ - můžeme spustit
