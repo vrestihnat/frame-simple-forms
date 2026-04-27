@@ -1,9 +1,13 @@
 # Rám na míru — průvodce pro juniora
 
 Tento dokument popisuje, **jak získat z API všechna data potřebná pro naplnění
-formuláře "Rám na míru"** (typy rámů, barvy, skla, podklady). Výpočet ceny a
-samotné přidání do košíku **nejsou v tomto zadání** — ty řeší samostatný
-endpoint (návrh `/api/frame/resolve`) a budou předmětem dalšího úkolu.
+formuláře "Rám na míru"** (typy rámů, barvy, skla, podklady), **jak z vypočtené
+ceny dostat ID Upgates produktu** (přes zaokrouhlenou cenovou hladinu), a
+**jak produkt přidat do košíku** stejným flow, jaký používá atyp euroklip.
+
+Výpočet ceny probíhá client-side (viz `frame_model.js` v git historii, logika
+zůstává stejná) — to **není předmětem tohoto zadání**. Junior dostane
+spočítanou cenu (např. `489 Kč`) a od ní pokračuje dál podle sekcí 8 a 9.
 
 Cílem je zrekonstruovat formulář, který v projektu dříve existoval jako
 `frame_template.html` + `frame_model.js`, ale nyní místo čtení lokálního
@@ -144,11 +148,25 @@ je vybírá nezávisle.
 │   → zobraz #color (byl skrytý)                             │
 ├────────────────────────────────────────────────────────────┤
 │ User vybere barvu, sklo, podklad, zadá rozměry a ks        │
-│   → nic nevoláme (cena se počítá na serveru až při        │
-│     "Do košíku" — mimo scope tohoto zadání)                │
+│   → client-side výpočet ceny (mimo scope — viz frame_model │
+│     v git historii; logika zůstává nezměněna)              │
+│   → debounce 350 ms, abychom nevolali API na každý         │
+│     keystroke (stejně jako euroklip)                       │
+├────────────────────────────────────────────────────────────┤
+│ Cena spočítána → získej ID produktu podle ceny             │
+│   GET /api/rounded_bohemian_product/{roundedPrice}/{lang}  │
+│   → ulož response.uri a response.upgatesId do modelu       │
+│   → povol #buy_btn                                         │
 ├────────────────────────────────────────────────────────────┤
 │ User klikne "Do košíku"                                    │
-│   → TODO: POST /api/frame/resolve { … } (samostatná etapa) │
+│   → sessionStorage.setItem('euroclip_cart_added', '1')     │
+│   → redirect na                                            │
+│     {uri}?addtocart=1                                      │
+│          &quantity={ks}                                    │
+│          &productnote={sestavená poznámka}                 │
+│          &return={currentPath}                             │
+│   → Upgates přidá produkt, přesměruje zpět na konfigurátor │
+│   → init.js přečte sessionStorage flag a zobrazí toast     │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -270,7 +288,141 @@ klíče (`_v2`, `_v3`), jinak klienti uvidí starý cache.
 
 ---
 
-## 8. Reference na starý kód
+## 8. Od ceny k ID produktu: `rounded_bohemian_product`
+
+Když máš spočítanou cenu (např. `489.50 Kč`), musíš ji zaokrouhlit na nejbližší
+**cenovou hladinu** — to je produkt, který v Upgatesu reálně existuje a do
+kterého uživatele pošleme.
+
+### Endpoint
+
+```
+GET https://api.ramari.cz/api/rounded_bohemian_product/{price}/{country}
+```
+
+- `price` — zaokrouhlená cena jako integer (`Math.round(clientPrice)`), např. `490`
+- `country` — `cz` nebo `sk` (podle jazyka — pro `pl` zatím zadávej `cz`)
+
+### Response
+
+```json
+{
+  "id": 123,
+  "czk": 500,
+  "eur": 20,
+  "uri": "/p/id-500",
+  "upgatesId": 15583
+}
+```
+
+- `czk` / `eur` — zaokrouhlená cena daného produktu (použij jako finální cenu v UI místo té spočítané — je to ta, kterou uživatel reálně zaplatí)
+- `uri` — path na Upgatesu, pod kterým produkt existuje (už obsahuje `/p/` prefix)
+- `upgatesId` — numerické ID produktu v Upgatesu (ukládej si ho pro debugging, ale do košíku vkládáme přes `uri`)
+
+### Jak je to **analogické k atyp euroklipu**
+
+Euroklip pro atyp rozměry volá interně totéž:
+
+1. `POST /api/euroclip/resolve` → server spočítá cenu z gridu a sám zavolá rounded_bohemian_product
+2. Vrátí `{ code: "id-500", uri: "/p/id-500", upgatesId: 15583, price: { value: 500, ... } }`
+
+U rámu počítáš client-side, takže si `rounded_bohemian_product` **voláš přímo ty**.
+
+### Kdy volat
+
+- **Ne** na každý keystroke — zdržíš UI
+- **Ano** po stabilizaci ceny (debounce 350 ms po posledním změněném rozměru/barvě/sklu/podkladu — stejně jako euroklip v [init.js:1033-1044](../euroclips/data/init.js#L1033-L1044))
+- Do té doby drž `#buy_btn` **disabled**
+
+### Na co si dát pozor
+
+- Když `rounded_bohemian_product` vrátí 404 (cena mimo rozsah hladin), zobraz
+  dialog "Tento rám bohužel neumíme takhle velký vyrobit" — neukazuj
+  JS chybu uživateli.
+- `uri` je plná cesta včetně `/p/`, takže ji **neprefixuj** znovu. Stačí:
+  ```js
+  window.location.href = resp.uri + '?addtocart=1&...';
+  ```
+
+---
+
+## 9. Přidání do košíku
+
+Stejný mechanismus jako atyp euroklip (viz
+[init.js:1253-1280](../euroclips/data/init.js#L1253-L1280)).
+
+### 9.1 Sestavení `productnote`
+
+Uživatel na detailu objednávky uvidí text, který sestavíš z výběru. Pro rám
+doporučená struktura (stejný formát, jako euroklip používá pro atyp kódy):
+
+```
+{A}x{B} | Rámeček {colorLabel} / sklo {glassLabel} / podklad {baseLabel} ({colorCode}|{glassCode}|{baseCode}|atyp)
+```
+
+Příklad:
+```
+30x40 | Rámeček Dantik Kostička hnědá / sklo Sklo čiré 2 mm / podklad MDF 3 mm (114.hneda|Sklo_2mm.cire|Z4-MDF|atyp)
+```
+
+Pravidla:
+- Všechny části jsou volitelné — pokud user zvolil "bez skla", sklo vynech
+- `|` jako oddělovač jednotlivých komponent v druhé části; oddělovač mezi
+  rozměrem a popisem je ` | ` (mezera, pipe, mezera)
+- Kód na konci v závorce má pořadí `color|glass|base|atyp` (pro atyp rámy
+  je poslední segment vždy literál `atyp`)
+- V `productnote` může být pipe `|` i diakritika `č ř ž` — `encodeURIComponent`
+  se o to postará.
+
+Viz `frame_model.js::getProductTypeCode()` v [git historii](#section-10) pro
+původní implementaci v `komplet|...` tvaru.
+
+### 9.2 Sestavení URL
+
+```js
+var ks = parseInt($('#kusy').val(), 10) || 1;
+var note = '...'; // viz výše
+var returnPath = window.location.pathname; // aby user skončil zpět na konfigurátoru
+
+var cartUrl = clip.getPriceProductUri()
+  + '?addtocart=1'
+  + '&quantity=' + ks
+  + '&productnote=' + encodeURIComponent(note)
+  + '&return=' + encodeURIComponent(returnPath);
+
+// flag pro toast po reloadu — init.js ho přečte a zobrazí zelený toast
+try { sessionStorage.setItem('euroclip_cart_added', '1'); } catch (e) {}
+
+window.location.href = cartUrl;
+```
+
+### 9.3 Co se stane potom
+
+1. Prohlížeč navigate na `{uri}?addtocart=1&...`
+2. Upgates přidá položku do košíku a redirect zpět na `returnPath`
+3. Stránka se načte znovu — konfigurátor je reset (prázdné rozměry, výchozí typy)
+4. `init.js` při startu najde `sessionStorage.euroclip_cart_added === '1'`,
+   smaže flag a zobrazí **zelený toast** "Produkt byl přidán do košíku" na 5 s
+5. Horní lišta Upgatesu ukazuje aktualizovaný počet kusů v košíku
+
+### 9.4 Ověření před submitem
+
+Dřív než do košíku:
+
+```js
+if (clip.getPrice() > 0
+    && clip.getUpgatesId() > 0
+    && clip.getPriceProductUri()) {
+  // OK, pokračuj s cartUrl
+} else {
+  // ještě se něco nespočítalo — nech buy_btn disabled
+  return false;
+}
+```
+
+---
+
+## 10. Reference na starý kód
 
 Kdybys chtěl vidět, jak frontend dělal ty samé věci před přesunem na API,
 podívej se do git historie:
@@ -293,7 +445,7 @@ git show c8ba221^:euroclips/data/init.js | less
 
 ---
 
-## 9. Existující euroklip jako předloha
+## 11. Existující euroklip jako předloha
 
 Aktuální euroklip řešení je **výrazně jednodušší** (jen jeden select typu),
 ale principy fetchování jsou stejné:
@@ -307,8 +459,9 @@ selectboxy a dynamickým `#color`.
 
 ---
 
-## 10. Checklist před PR
+## 12. Checklist před PR
 
+**Naplnění formuláře (sekce 1–7):**
 - [ ] Všechny 3 endpointy se volají paralelně (`Promise.all`)
 - [ ] Selectboxy jsou naplněny po `window.load`, ne blokují render
 - [ ] Změna `#frame-type` dynamicky aktualizuje `#color`
@@ -317,5 +470,22 @@ selectboxy a dynamickým `#color`.
 - [ ] Cache v sessionStorage (volitelné, ale doporučené)
 - [ ] Fallback na CZ pro chybějící překlady
 - [ ] Rozměry > 9 cm (stejná validace jako euroklip)
+
+**ID produktu podle ceny (sekce 8):**
+- [ ] Client-side cena je zaokrouhlena (`Math.round`) před posláním do API
+- [ ] Volání `rounded_bohemian_product` je debounced (350 ms) — ne per keystroke
+- [ ] Během čekání na response je `#buy_btn` disabled
+- [ ] 404 response zobrazí dialog, ne JS chybu
+- [ ] Finální cena v UI je z response.czk/eur, ne z client-side výpočtu
+
+**Do košíku (sekce 9):**
+- [ ] `productnote` obsahuje rozměr, popis v jazyce UI a kódy v závorce
+- [ ] URL má `quantity`, `productnote`, `return=<current path>`
+- [ ] Před redirectem: `sessionStorage.setItem('euroclip_cart_added', '1')`
+- [ ] Submit je chráněn podmínkou (cena > 0, uri, upgatesId)
+
+**Celkové:**
 - [ ] Manuální test ve všech třech jazycích (CZ/SK/PL) — stačí dočasně
       přepnout `$.euroclip.LANG` v konzoli
+- [ ] Test add-to-cart → stránka se resetuje → zelený toast se zobrazí
+- [ ] Košík v headeru Upgatesu ukazuje zvýšený počet položek
