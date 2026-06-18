@@ -757,6 +757,14 @@ function fn() {
         $.euroclip.log("hash sizes: " + defaultSizeA + "x" + defaultSizeB);
       }
 
+      // když rozměry nepřišly zvenčí (marker data-size-*, URL atyp, hash),
+      // použij jako default A4 (21 x 29,7 cm)
+      if (!(defaultSizeA > 0 && defaultSizeB > 0)) {
+        defaultSizeA = 21;
+        defaultSizeB = 29.7;
+        $.euroclip.log("default A4 sizes: 21x29.7");
+      }
+
       // pokud víme typ - můžeme spustit
       if ($.euroclip.currentProduct !== null) {
 
