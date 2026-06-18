@@ -158,6 +158,20 @@
 			flex: none;
 		}
 	}
+
+	/* Mount přes řídící div (.euroclip-config) na obsahové stránce:
+	   skrýt náhledovou galerii a zarovnat formulář k pravému okraji
+	   obsahového sloupce (vlevo zůstane místo pro text stránky).
+	   Produktový detail má holder bez .euroclip-config → nemění se. */
+	.euroclip-config.euroclipconfig .ecf-gallery {
+		display: none;
+	}
+	.euroclip-config.euroclipconfig .ecf-config {
+		justify-content: flex-end;
+	}
+	.euroclip-config.euroclipconfig .ecf-form {
+		flex: 0 1 420px;
+	}
 </style>
 
 <div class="ecf-config">
