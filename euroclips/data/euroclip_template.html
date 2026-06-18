@@ -179,6 +179,11 @@
 	.euroclip-config.euroclipconfig .ecf-form {
 		flex: none;
 	}
+	/* form má třídu .card-body (Upgates padding 1.3334rem) — horní mezeru
+	   na marker-mountu zrušíme, ať formulář začíná nahoře u titulku */
+	.euroclip-config.euroclipconfig .ecf-form .card-body {
+		padding-top: 0;
+	}
 	@media (max-width: 600px) {
 		.euroclip-config.euroclipconfig {
 			float: none;
