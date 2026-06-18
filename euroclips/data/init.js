@@ -52,20 +52,23 @@ function fn() {
   if ($.euroclip.HOLDER.length === 0) {
     $.euroclip.HOLDER = $('#detail .c1303').first(); // fallback pro starý eshop
   }
+  // pozn.: pro novou Upgates šablonu (Frame/DEK), která nemá ani jeden z výše
+  // uvedených selektorů, se holder vytvoří líně až ve $.euroclip.setup()
+  // (jen pro produkt konfigurátoru) — viz fallback v bloku currentProduct !== null
   $.euroclip.WEB_PREFIX = "";
 
   if (window.location.hostname.indexOf(".sk") > 0) {
     $.euroclip.LANG = "sk";
-    $.euroclip.SCRIPT_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/data/';
-    $.euroclip.SHOP_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/';
+    $.euroclip.SCRIPT_SOURCE = '/shop-data/js/configurator/euroclip/';
+    $.euroclip.SHOP_SOURCE = '/shop-data/js/configurator/';
     $.euroclip.ADDR_BASKET = $.euroclip.WEB_PREFIX + "dantik-sk/e-basket";
     $.euroclip.ADDR_BASKET_2 = $.euroclip.WEB_PREFIX + "dantik-sk/e-shipping";
     $.euroclip.ADDR_BASKET_3 = $.euroclip.WEB_PREFIX + "dantik-sk/e-delivery";
     $.euroclip.ID_SITE = 9862; //ID uživatele eshop-rychle
   } else {
     $.euroclip.LANG = "cz";
-    $.euroclip.SCRIPT_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/data/';
-    $.euroclip.SHOP_SOURCE = 'https://data.ramari.cz/wholesale/frame-simple-forms/euroclips/';
+    $.euroclip.SCRIPT_SOURCE = '/shop-data/js/configurator/euroclip/';
+    $.euroclip.SHOP_SOURCE = '/shop-data/js/configurator/';
     $.euroclip.ADDR_BASKET = $.euroclip.WEB_PREFIX + "dantik-cz/e-basket";
     $.euroclip.ADDR_BASKET_2 = $.euroclip.WEB_PREFIX + "dantik-cz/e-shipping";
     $.euroclip.ADDR_BASKET_3 = $.euroclip.WEB_PREFIX + "dantik-cz/e-delivery";
@@ -675,16 +678,53 @@ function fn() {
       var defaultSizeA = defaultSizeB = 0;
 
       /*
-       * PRODUKT Z KONFIGU
+       * ŘÍDÍCÍ DIV (přednost před URL)
+       *
+       * Editor vloží do obsahu libovolné stránky / článku v Upgates marker:
+       *   <div class="euroclip-config" data-euroclip-code="EKP_K_atyp"></div>
+       * volitelně s předvyplněnými rozměry (cm):
+       *   <div class="euroclip-config" data-euroclip-code="EKP_K_atyp"
+       *        data-size-a="15" data-size-b="20"></div>
+       *
+       * Konfigurátor se pak vykreslí přímo do tohoto divu (HOLDER), variantu
+       * určuje výhradně data-euroclip-code a URL stránky je nepodstatná. Funguje
+       * tedy i mimo detail produktu (např. /euroklip-plexi-cire). Když marker
+       * není přítomen, spadne se na původní detekci podle URL (níže).
        */
       $.euroclip.log("HOLDER: " + $.euroclip.HOLDER.length + " elements, href: " + href);
       $.euroclip.log("products count: " + ($.euroclip.products ? $.euroclip.products.length : "UNDEFINED"));
-      for (var i = 0; i < $.euroclip.products.length; i++) {
-        if (href.endsWith($.euroclip.products[i].url)) {
-          $.euroclip.currentProduct = $.euroclip.products[i];
-          $.euroclip.currentGroup = $.euroclip.products[i].group; // group je frame, nebo euroklip, nebo glass, nebo base
-          $.euroclip.log("MATCH: " + $.euroclip.products[i].code + " | " + $.euroclip.products[i].url);
-          break;
+
+      var $ecMarker = $('.euroclip-config[data-euroclip-code]').first();
+      if ($ecMarker.length) {
+        var ecWantedCode = $ecMarker.attr('data-euroclip-code');
+        for (var i = 0; i < $.euroclip.products.length; i++) {
+          if ($.euroclip.products[i].code === ecWantedCode) {
+            $.euroclip.currentProduct = $.euroclip.products[i];
+            $.euroclip.currentGroup = $.euroclip.products[i].group; // frame / euroklip / glass / base
+            $.euroclip.log("MARKER MATCH: " + ecWantedCode);
+            break;
+          }
+        }
+        if ($.euroclip.currentProduct === null) {
+          $.euroclip.log("MARKER: neznámý data-euroclip-code='" + ecWantedCode + "'");
+        }
+        $.euroclip.HOLDER = $ecMarker; // mount konfigurátoru přímo do markeru
+        var ecDa = parseFloat(($ecMarker.attr('data-size-a') || '').replace(',', '.'));
+        var ecDb = parseFloat(($ecMarker.attr('data-size-b') || '').replace(',', '.'));
+        if (ecDa > 0 && ecDb > 0) { defaultSizeA = ecDa; defaultSizeB = ecDb; }
+      }
+
+      /*
+       * PRODUKT Z KONFIGU (fallback podle URL, jen když nebyl řídící div)
+       */
+      if ($.euroclip.currentProduct === null) {
+        for (var i = 0; i < $.euroclip.products.length; i++) {
+          if (href.endsWith($.euroclip.products[i].url)) {
+            $.euroclip.currentProduct = $.euroclip.products[i];
+            $.euroclip.currentGroup = $.euroclip.products[i].group; // group je frame, nebo euroklip, nebo glass, nebo base
+            $.euroclip.log("MATCH: " + $.euroclip.products[i].code + " | " + $.euroclip.products[i].url);
+            break;
+          }
         }
       }
 
@@ -720,17 +760,33 @@ function fn() {
       // pokud víme typ - můžeme spustit
       if ($.euroclip.currentProduct !== null) {
 
+        // Vlastní mount konfigurátoru. Vyčleněn do funkce, protože holder
+        // nemusí existovat hned: na nové Upgates šabloně (Frame/DEK) se detail
+        // produktu (.pd-info) dorenderovává AJAXem až po DOMContentLoaded, takže
+        // při čtení configu z cache (config_v2) může setup() proběhnout dřív,
+        // než holder vznikne. Holder se proto zajišťuje až níže (viz ecMount).
+        var startConfigurator = function () {
+
+        // guard proti dvojímu mountu — jinak by se duplikovaly položky <select>
+        if (document.getElementById('euroclipconfig')) {
+          return;
+        }
+
         // Zrušit pojistný timeout na reload (konfigurátor se úspěšně spustil)
         if (typeof window.euroclipConfiguratorTimeout !== 'undefined') {
           clearTimeout(window.euroclipConfiguratorTimeout);
         }
 
-        var $h1 = $("h1.c716.c1335");
-        if ($h1.length === 0) $h1 = $.euroclip.HOLDER.closest('[data-designer-module]').parent().find('h1').first(); // UpGates
-        if ($h1.length === 0) $h1 = $.euroclip.HOLDER.prevAll('h1').first(); // další fallback
-        if ($h1.length === 0) $h1 = $("h1").first();
-        $.euroclip.log("H1 found: " + $h1.length + " | text: " + $h1.text());
-        $h1.text("Konfigurátor");
+        // U mountu přes řídící div ponecháme vlastní nadpis stránky/článku;
+        // přejmenování na "Konfigurátor" dává smysl jen na detailu produktu.
+        if (!$ecMarker.length) {
+          var $h1 = $("h1.c716.c1335");
+          if ($h1.length === 0) $h1 = $.euroclip.HOLDER.closest('[data-designer-module]').parent().find('h1').first(); // UpGates
+          if ($h1.length === 0) $h1 = $.euroclip.HOLDER.prevAll('h1').first(); // další fallback
+          if ($h1.length === 0) $h1 = $("h1").first();
+          $.euroclip.log("H1 found: " + $h1.length + " | text: " + $h1.text());
+          $h1.text("Konfigurátor");
+        }
         $.euroclip.HOLDER.html('<img src="' + $.euroclip.SCRIPT_SOURCE + 'loading.svg" style="width:64px;height:64px;margin:100px auto">').addClass("euroclipconfig").attr('id', 'euroclipconfig');
 
         // Odebrat předběžnou třídu z head scriptu, konfigurátor se nyní opravdu spouští
@@ -889,8 +945,13 @@ function fn() {
 
           // naplnění typů euroklipů
           var $frameType = $("#frame-type");
+          $frameType.empty(); // idempotence — žádné duplicitní položky při opakovaném load()
+          // config vrací stejné euroklipy pod více URL aliasy (CZ/SK varianty),
+          // takže se stejný code v products opakuje — do <select> patří každý jen jednou
+          var seenCodes = {};
           $($.euroclip.products).each(function (i, item) {
-            if (item.group === "euroklip") {
+            if (item.group === "euroklip" && !seenCodes[item.code]) {
+              seenCodes[item.code] = true;
               if (item.code == $.euroclip.currentProduct.code) {
                 $frameType.append('<option value="' + item.code + '" selected>' + item.label + '</option>');
               } else {
@@ -1049,6 +1110,40 @@ function fn() {
           $.euroclip.log("Loaded!");
 
         };
+        }; // konec startConfigurator
+
+        // Zajistit holder a teprve pak spustit konfigurátor.
+        if ($.euroclip.HOLDER.length) {
+          // starší šablona / starý eshop — holder už v DOM je
+          startConfigurator();
+        } else {
+          // Nová Upgates šablona (Frame/DEK): vytvoříme vlastní holder v pravém
+          // sloupci .pd-info. Ten ale chodí AJAXem se zpožděním, proto na něj
+          // počkáme (max ~10 s). Děláme to jen pro produkt konfigurátoru, takže
+          // na běžných produktech / v košíku se nic neschovává.
+          var ecTries = 0;
+          var ecMount = function () {
+            if (document.getElementById('euroclipconfig')) return; // už namountováno
+            var $pdInfo = $('.pd-info').first();
+            if ($pdInfo.length) {
+              // schovat standardní cenu + košíkový formulář — nahrazuje je konfigurátor
+              $pdInfo.find('#snippet--pricesAjax1, #frm-productForm').hide();
+              // schovat levý sloupec s fotkou produktu — konfigurátor má vlastní náhled,
+              // jinak by se obrázek zobrazoval dvakrát
+              $('.row.gy-5 > .pd-photos').hide();
+              // pravý sloupec roztáhnout na plnou šířku (grid-agnostic, ať nezůstane prázdná půlka)
+              $pdInfo.css({ flex: '0 0 100%', maxWidth: '100%' });
+              $.euroclip.HOLDER = $('<div data-designer-module="product-detail-top-2"></div>').prependTo($pdInfo);
+              $.euroclip.log('[euroclip] holder vytvořen v .pd-info (nová šablona)');
+              startConfigurator();
+            } else if (ecTries++ < 100) {
+              setTimeout(ecMount, 100); // čekat na AJAX render detailu
+            } else {
+              $.euroclip.log('[euroclip] .pd-info se neobjevil, konfigurátor nelze namountovat');
+            }
+          };
+          ecMount();
+        }
       } else {
         // něco jiného - běžný produkt?
         var $h1check = $("h1.c716.c1335");
