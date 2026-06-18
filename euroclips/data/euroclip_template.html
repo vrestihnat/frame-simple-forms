@@ -160,17 +160,31 @@
 	}
 
 	/* Mount přes řídící div (.euroclip-config) na obsahové stránce:
-	   skrýt náhledovou galerii a zarovnat formulář k pravému okraji
-	   obsahového sloupce (vlevo zůstane místo pro text stránky).
+	   konfigurátor plave vpravo a text stránky ho obtéká zleva. Galerie
+	   se skrývá. Aby text obtékal, musí být marker v obsahu UMÍSTĚN PŘED
+	   odstavci (float nechá obtékat jen obsah za sebou).
 	   Produktový detail má holder bez .euroclip-config → nemění se. */
+	.euroclip-config.euroclipconfig {
+		float: right;
+		width: 420px;
+		max-width: 100%;
+		margin: 0 0 16px 24px;
+	}
 	.euroclip-config.euroclipconfig .ecf-gallery {
 		display: none;
 	}
 	.euroclip-config.euroclipconfig .ecf-config {
-		justify-content: flex-end;
+		display: block; /* holder má pevnou šířku, flex už netřeba */
 	}
 	.euroclip-config.euroclipconfig .ecf-form {
-		flex: 0 1 420px;
+		flex: none;
+	}
+	@media (max-width: 600px) {
+		.euroclip-config.euroclipconfig {
+			float: none;
+			width: auto;
+			margin: 0 0 16px 0;
+		}
 	}
 </style>
 
