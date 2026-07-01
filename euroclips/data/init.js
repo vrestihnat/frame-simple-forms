@@ -222,7 +222,7 @@ function fn() {
       var ks = parseInt(item[1].replace("ks=", ""));
       var note = item[2].replace("note=", "").replaceAll("+", " ");
 
-      var url = "https://api.ramari.cz/api/rounded_bohemian_product/" + price + "/" + $.euroclip.LANG;
+      var url = "https://apiramari.profiramari.cz/api/rounded_bohemian_product/" + price + "/" + $.euroclip.LANG;
 
       $.euroclip.log(price);
       $.euroclip.log(ks);
@@ -320,7 +320,7 @@ function fn() {
     var getConfig = $.ajax({
       crossDomain: true,
       type: 'GET',
-      url: 'https://api.ramari.cz/api/configurator/config?lang=' + $.euroclip.LANG,
+      url: 'https://apiramari.profiramari.cz/api/configurator/config?lang=' + $.euroclip.LANG,
       dataType: "json",
       success: function (data) {
         // API vrací { lang, settings, products } — klient používá settings + products

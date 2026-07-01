@@ -29,7 +29,7 @@ $.extend($.euroclip.Frame.prototype, {
 		this.xhr = $.ajax({
 			crossDomain: true,
 			type: 'POST',
-			url: "https://api.ramari.cz/api/euroclip/resolve",
+			url: "https://apiramari.profiramari.cz/api/euroclip/resolve",
 			contentType: "application/json",
 			dataType: "json",
 			headers: { Accept: "application/json" },

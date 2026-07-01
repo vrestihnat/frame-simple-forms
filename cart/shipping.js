@@ -8,7 +8,7 @@
  *  - /cart     posbírá z každého řádku košíku poznámku, rozměr, množství, URL
  *              a uloží je do localStorage (na /shipment už poznámka v DOM není).
  *  - /shipment sestaví obsah košíku, pošle ho na
- *              POST https://api.ramari.cz/api/cart/shipping-options
+ *              POST https://apiramari.profiramari.cz/api/cart/shipping-options
  *              a podle odpovědi schová nevhodné dopravy/platby a vybere
  *              první viditelnou možnost.
  *
@@ -18,7 +18,7 @@
 (function () {
   "use strict";
 
-  var API_URL = "https://api.ramari.cz/api/cart/shipping-options";
+  var API_URL = "https://apiramari.profiramari.cz/api/cart/shipping-options";
   var STORE_KEY = "dantik_cart_notes";
 
   var LANG = (function () {
