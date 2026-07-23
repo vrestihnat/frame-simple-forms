@@ -7,10 +7,11 @@
  * Tok:
  *  - /cart     posbírá z každého řádku košíku poznámku, rozměr, množství, URL
  *              a uloží je do localStorage (na /shipment už poznámka v DOM není).
- *  - /shipment sestaví obsah košíku, pošle ho na
+ *  - /shipment sestaví obsah košíku; pokud obsahuje aspoň jedno zboží na míru
+ *              (kód produktu ve tvaru ID-<číslo>), pošle ho na
  *              POST https://apiramari.profiramari.cz/api/cart/shipping-options
  *              a podle odpovědi schová nevhodné dopravy/platby a vybere
- *              první viditelnou možnost.
+ *              první viditelnou možnost. Bez zboží na míru se API nevolá.
  *
  * Rozhodovací logika (rozměry, váha, sklo/plexi, atyp) je celá na API —
  * server-side port původního klientského filtru z frame-simple-forms/old/init.js.
@@ -277,6 +278,11 @@
     selectFirstVisible("payments");
   }
 
+  // Zboží na míru poznáme podle kódu ve tvaru ID-<číslo> (např. ID-12345).
+  function isCustomProduct(p) {
+    return /^ID-\d+/i.test(String(p.code || "").trim());
+  }
+
   function requestAndApply() {
     var products = buildProducts();
     var shipments = collectMethods("shipments").map(stripDom);
@@ -284,6 +290,11 @@
 
     if (!shipments.length) {
       log("no shipments on page yet");
+      return;
+    }
+
+    if (!products.some(isCustomProduct)) {
+      log("no custom (ID-<n>) product in cart, skipping API");
       return;
     }
 
