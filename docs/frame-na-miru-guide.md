@@ -249,6 +249,7 @@ Podporované formáty (lze míchat):
 | `https://www.dantik.cz/p/ekp-k-atyp#15x20` | 15 × 20 cm |
 | `https://www.dantik.cz/p/ekp-k-atyp#a=15&b=20` | 15 × 20 cm |
 | `https://www.dantik.cz/p/ekp-k-atyp#x=15&y=20` | 15 × 20 cm (alias) |
+| `https://www.dantik.cz/p/ekp-k-atyp#sirka=15&vyska=20` | 15 × 20 cm (české aliasy, funguje i `šířka`/`výška`) |
 
 Hash má **prioritu nad path** — pokud je URL `/p/EKP-K-atyp-19x43#10x20`,
 zobrazí se 10×20.

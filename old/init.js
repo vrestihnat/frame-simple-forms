@@ -92,8 +92,9 @@ function fn() {
   /**
    * Parse rozměrů z URL hashe (sdílení odkazů s předvyplněnými rozměry).
    * Formáty:
-   *   #20x30          kompaktní (NxM)
-   *   #a=20&b=30      parametrický (aliasy x= a y=)
+   *   #20x30                 kompaktní (NxM)
+   *   #a=20&b=30             parametrický (aliasy x= a y=)
+   *   #sirka=20&vyska=30     české aliasy (i s diakritikou: šířka/výška)
    * Vrací { a: number, b: number } nebo null.
    */
   function parseHashSizes(hash) {
@@ -109,10 +110,16 @@ function fn() {
     var params = {};
     raw.split('&').forEach(function (pair) {
       var eq = pair.indexOf('=');
-      if (eq > 0) params[pair.slice(0, eq).toLowerCase()] = decodeURIComponent(pair.slice(eq + 1));
+      if (eq > 0) {
+        var key = pair.slice(0, eq).toLowerCase();
+        try {
+          key = decodeURIComponent(key).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        } catch (e) {}
+        params[key] = decodeURIComponent(pair.slice(eq + 1));
+      }
     });
-    var a = params.a || params.x;
-    var b = params.b || params.y;
+    var a = params.a || params.x || params.sirka;
+    var b = params.b || params.y || params.vyska;
     if (a && b) {
       var fa = parseFloat(String(a).replace(',', '.'));
       var fb = parseFloat(String(b).replace(',', '.'));
